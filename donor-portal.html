@@ -10,35 +10,257 @@
   <link rel="stylesheet" href="css/dashboard.css">
   <style>
     .donor-profile-card {
-      background: linear-gradient(135deg, var(--red-800), var(--red-600));
-      border-radius: var(--radius-xl); padding: 32px;
-      display: flex; align-items: center; gap: 24px; margin-bottom: 28px;
+      position: relative;
+      background: linear-gradient(135deg, #881337 0%, #be123c 45%, #e11d48 100%);
+      border-radius: var(--radius-2xl, 24px);
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      overflow: hidden;
+      box-shadow: 0 16px 36px -10px rgba(190, 18, 60, 0.42), 0 4px 12px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: white;
+    }
+    .donor-card-glow {
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 70%);
+      pointer-events: none;
+    }
+    .donor-profile-card::after {
+      content: '🩸';
+      position: absolute;
+      right: 15px;
+      bottom: -25px;
+      font-size: 11rem;
+      opacity: 0.07;
+      pointer-events: none;
+      line-height: 1;
+      transform: rotate(-15deg);
+    }
+    .donor-card-main {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      width: 100%;
     }
     .donor-profile-avatar {
-      width: 80px; height: 80px; border-radius: 50%;
-      background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.4);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2rem; font-weight: 800; color: white;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      border: 3px solid rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: white;
+      flex-shrink: 0;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     }
-    .donor-profile-info { flex: 1; }
-    .donor-profile-name { font-size: 1.4rem; font-weight: 800; color: white; font-family: var(--font-display); }
-    .donor-profile-meta { font-size: 0.88rem; color: rgba(255,255,255,0.7); margin-top: 4px; }
+    .donor-profile-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .donor-profile-header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .donor-card-badge-pill {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.88);
+      background: rgba(0, 0, 0, 0.16);
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+    .donor-profile-name {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: #ffffff;
+      font-family: var(--font-display);
+      margin: 0;
+      line-height: 1.2;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+    .donor-profile-meta {
+      font-size: 0.88rem;
+      color: rgba(255, 255, 255, 0.82);
+      margin-top: 5px;
+      font-weight: 500;
+    }
+    .donor-profile-badges {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .badge-available {
+      background: rgba(16, 185, 129, 0.28);
+      color: #ecfdf5;
+      border: 1px solid rgba(110, 231, 183, 0.5);
+    }
+    .badge-unavailable {
+      background: rgba(156, 163, 175, 0.25);
+      color: #f3f4f6;
+      border: 1px solid rgba(209, 213, 219, 0.35);
+    }
+    .badge-neutral {
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+    }
+    .badge-verified {
+      background: rgba(255, 255, 255, 0.14);
+      color: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.74rem;
+    }
+    .donor-profile-blood-box {
+      background: rgba(255, 255, 255, 0.16);
+      border: 1.5px solid rgba(255, 255, 255, 0.38);
+      border-radius: 18px;
+      padding: 10px 18px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      min-width: 90px;
+    }
+    .donor-profile-blood-label {
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 2px;
+    }
     .donor-profile-blood {
-      background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4);
-      color: white; padding: 10px 20px; border-radius: var(--radius-full);
-      font-family: var(--font-display); font-size: 1.6rem; font-weight: 800;
+      font-family: var(--font-display);
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
+
     .eligibility-card {
-      border-radius: var(--radius-xl); padding: 24px; text-align: center;
-      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
     }
-    .eligibility-card.eligible { background: #d1fae5; border: 1px solid #a7f3d0; }
-    .eligibility-card.ineligible { background: var(--red-50); border: 1px solid var(--red-100); }
-    .elig-icon { font-size: 2rem; }
-    .elig-status { font-size: 1rem; font-weight: 700; }
+    .eligibility-card.eligible {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border: 1px solid #a7f3d0;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.12);
+    }
+    .eligibility-card.ineligible {
+      background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+      border: 1px solid #fecdd3;
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.1);
+    }
+    .elig-icon {
+      font-size: 2.3rem;
+      line-height: 1;
+    }
+    .elig-status {
+      font-size: 1.05rem;
+      font-weight: 800;
+      font-family: var(--font-display);
+    }
     .eligibility-card.eligible .elig-status { color: #065f46; }
-    .eligibility-card.ineligible .elig-status { color: var(--red-700); }
-    .elig-detail { font-size: 0.82rem; color: var(--gray-500); }
+    .eligibility-card.ineligible .elig-status { color: var(--red-800); }
+    .elig-detail {
+      font-size: 0.85rem;
+      color: var(--gray-600);
+      max-width: 380px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 680px) {
+      .donor-profile-card {
+        padding: 18px 16px;
+        border-radius: 18px;
+        margin-bottom: 18px;
+      }
+      .donor-card-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .donor-profile-header-row {
+        width: 100%;
+        gap: 10px;
+      }
+      .donor-profile-avatar {
+        width: 54px;
+        height: 54px;
+        font-size: 1.45rem;
+        border-width: 2.5px;
+      }
+      .donor-profile-name {
+        font-size: 1.22rem;
+      }
+      .donor-profile-blood-box {
+        padding: 7px 12px;
+        min-width: 70px;
+        border-radius: 14px;
+      }
+      .donor-profile-blood {
+        font-size: 1.45rem;
+      }
+      .donor-profile-meta {
+        font-size: 0.8rem;
+        margin-top: 3px;
+      }
+      .donor-profile-badges {
+        margin-top: 10px;
+        gap: 6px;
+      }
+      .badge-pill {
+        padding: 4px 10px;
+        font-size: 0.72rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -81,13 +303,13 @@
 
   <main class="dashboard-main">
     <div class="dashboard-topbar">
-      <div style="display:flex;align-items:center;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;">
         <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Sidebar">☰</button>
         <div class="topbar-title">Donor Dashboard</div>
       </div>
       <div class="topbar-right">
-        <a href="index.html" class="btn btn-outline btn-sm">View Portal</a>
-        <button class="btn btn-outline btn-sm" onclick="Auth.logout()" style="gap:4px;">🚪 Logout</button>
+        <a href="index.html" class="btn btn-outline btn-sm topbar-portal-btn" title="View Public Portal"><span class="topbar-btn-icon">🌐</span><span class="topbar-btn-text">Portal</span></a>
+        <button class="btn btn-outline btn-sm topbar-logout-btn" onclick="Auth.logout()" title="Logout"><span class="topbar-btn-icon">🚪</span><span class="topbar-btn-text">Logout</span></button>
         <div class="user-avatar-sm" id="topbarAvatar" onclick="Auth.logout()" title="Click to Logout" style="cursor:pointer;">D</div>
       </div>
     </div>
@@ -99,20 +321,32 @@
 
       <!-- Profile Card -->
       <div class="donor-profile-card" id="profileCard">
-        <div class="donor-profile-avatar" id="profileAvatar">D</div>
-        <div class="donor-profile-info">
-          <div class="donor-profile-name" id="profileName">Donor Name</div>
-          <div class="donor-profile-meta" id="profileMeta">Roll No · Department</div>
-          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-            <span id="profileAvailBadge" class="badge badge-success">✓ Available to Donate</span>
-            <span class="badge badge-info" id="profileDonationBadge">🩸 0 Donations</span>
+        <div class="donor-card-glow"></div>
+        <div class="donor-card-main">
+          <div class="donor-profile-avatar" id="profileAvatar">D</div>
+          <div class="donor-profile-info">
+            <div class="donor-profile-header-row">
+              <div>
+                <span class="donor-card-badge-pill">OFFICIAL NSS BLOOD DONOR</span>
+                <h2 class="donor-profile-name" id="profileName">Donor Name</h2>
+              </div>
+              <div class="donor-profile-blood-box">
+                <span class="donor-profile-blood-label">BLOOD GROUP</span>
+                <span class="donor-profile-blood" id="profileBlood">O+</span>
+              </div>
+            </div>
+            <div class="donor-profile-meta" id="profileMeta">Roll No · Department · Year</div>
+            <div class="donor-profile-badges">
+              <span id="profileAvailBadge" class="badge-pill badge-available">✓ Available to Donate</span>
+              <span class="badge-pill badge-neutral" id="profileDonationBadge">🩸 0 Donations</span>
+              <span class="badge-pill badge-verified">🛡️ NSS Registered</span>
+            </div>
           </div>
         </div>
-        <div class="donor-profile-blood" id="profileBlood">O+</div>
       </div>
 
       <!-- Stats -->
-      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:28px;">
+      <div class="donor-stats-grid">
         <div class="stat-card">
           <div class="stat-card-icon red">🩸</div>
           <div class="stat-card-body">
@@ -230,11 +464,17 @@
     const d = myDonorData;
     document.getElementById('profileAvatar').textContent     = d.name.charAt(0);
     document.getElementById('profileName').textContent       = d.name;
-    document.getElementById('profileMeta').textContent       = `${d.rollNo} · ${d.dept} · ${d.year} Year`;
+    const yearRaw = (d.year || '').toString().trim();
+    let yearDisplay = yearRaw;
+    if (yearRaw && !yearRaw.toLowerCase().includes('year') && !yearRaw.toLowerCase().includes('faculty') && !yearRaw.toLowerCase().includes('staff')) {
+      yearDisplay = `${yearRaw} Year`;
+    }
+    const metaParts = [d.rollNo, d.dept, yearDisplay].filter(Boolean);
+    document.getElementById('profileMeta').textContent = metaParts.join(' · ');
     document.getElementById('profileBlood').textContent      = d.blood;
     document.getElementById('profileDonationBadge').textContent = `🩸 ${d.donations} Donation${d.donations!==1?'s':''}`;
-    document.getElementById('profileAvailBadge').textContent = d.available ? '✓ Available' : '✗ Unavailable';
-    document.getElementById('profileAvailBadge').className   = d.available ? 'badge badge-success' : 'badge badge-gray';
+    document.getElementById('profileAvailBadge').textContent = d.available ? '✓ Available to Donate' : '✗ Unavailable';
+    document.getElementById('profileAvailBadge').className   = d.available ? 'badge-pill badge-available' : 'badge-pill badge-unavailable';
 
     document.getElementById('myDonations').textContent  = d.donations;
     document.getElementById('livesSaved').textContent   = d.donations * 3;
@@ -265,13 +505,15 @@
     const slider = document.getElementById('availSlider');
     const label  = document.getElementById('availLabel');
     if (d.available) {
-      slider.style.background = 'var(--red-500)';
+      slider.style.background = '#10b981';
       thumb.style.transform = 'translateX(24px)';
-      label.textContent = 'Available';
+      label.textContent = 'Available (Ready to Donate)';
+      label.style.color = '#065f46';
     } else {
       slider.style.background = 'var(--gray-300)';
       thumb.style.transform = 'translateX(0)';
       label.textContent = 'Unavailable';
+      label.style.color = 'var(--gray-500)';
     }
 
     // Events
@@ -296,7 +538,7 @@
   function toggleAvailability() {
     if (!myDonorData) return;
     DonorStore.update(myDonorData.id, { available: !myDonorData.available });
-    myDonorData = DonorStore.getAll().find(d => d.id === myDonorData.id);
+    myDonorData = DonorStore.getAll().find(d => String(d.id) === String(myDonorData.id)) || { ...myDonorData, available: !myDonorData.available };
     loadPortal();
     showToast(`Status updated: ${myDonorData.available ? 'Available' : 'Unavailable'}`, 'success');
   }

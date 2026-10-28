@@ -367,38 +367,43 @@
     display: none; /* Hide broad search input on mobile */
   }
   .topbar-right {
-    gap: 8px;
+    gap: 6px;
   }
   .notification-btn {
-    width: 34px;
-    height: 34px;
-    font-size: 0.95rem;
-  }
-  .topbar-right .btn-sm {
-    padding: 6px 10px;
-    font-size: 0.78rem;
-  }
-  .user-avatar-sm {
     width: 32px;
     height: 32px;
-    font-size: 0.82rem;
+    font-size: 0.9rem;
+  }
+  .topbar-portal-btn,
+  .topbar-logout-btn {
+    padding: 5px 9px !important;
+    font-size: 0.78rem !important;
+  }
+  .topbar-portal-btn .topbar-btn-text,
+  .topbar-logout-btn .topbar-btn-text {
+    display: none;
+  }
+  .user-avatar-sm {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
   }
 
   /* Content area */
   .dashboard-content {
-    padding: 16px 14px 48px;
+    padding: 14px 12px 48px;
     width: 100%;
     max-width: 100vw;
     box-sizing: border-box;
   }
 
   .page-title {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     margin-bottom: 4px;
   }
   .page-subtitle {
-    font-size: 0.82rem;
-    margin-bottom: 18px;
+    font-size: 0.8rem;
+    margin-bottom: 16px;
     line-height: 1.4;
   }
 
@@ -472,5 +477,105 @@
     padding: 10px 12px;
     font-size: 0.8rem;
     white-space: nowrap;
+  }
+}
+
+/* Donor Specific Stats Grid */
+.donor-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 28px;
+}
+@media (max-width: 900px) {
+  .donor-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .donor-stats-grid .stat-card:last-child {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 480px) {
+  .donor-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .donor-stats-grid .stat-card {
+    padding: 14px 12px;
+    gap: 10px;
+  }
+  .donor-stats-grid .stat-card-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.15rem;
+  }
+  .donor-stats-grid .stat-card-val {
+    font-size: 1.35rem;
+  }
+  .donor-stats-grid .stat-card-label {
+    font-size: 0.72rem;
+    line-height: 1.25;
+  }
+}
+
+/* Common topbar buttons */
+.topbar-portal-btn, .topbar-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.topbar-btn-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* Modern Volunteer table tags */
+.batch-badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: var(--red-50);
+  border: 1px solid var(--red-100);
+  color: var(--red-700);
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+  display: inline-block;
+}
+.dept-badge {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  background: var(--gray-100);
+  padding: 3px 8px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+/* Micro screen fallback (< 380px) */
+@media (max-width: 380px) {
+  .topbar-title {
+    max-width: 110px;
+    font-size: 0.88rem;
+  }
+  .dashboard-topbar {
+    padding: 0 8px;
+    gap: 4px;
+  }
+  .topbar-right {
+    gap: 4px;
+  }
+  .donor-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .donor-stats-grid .stat-card:last-child {
+    grid-column: auto;
   }
 }

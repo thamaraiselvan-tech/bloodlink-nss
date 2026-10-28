@@ -15,6 +15,7 @@
       background: white; border: 1px solid var(--gray-100); border-radius: var(--radius-xl);
       padding: 20px 16px; text-align: center; cursor: pointer; transition: var(--transition);
       display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
     .quick-action-btn:hover { border-color: var(--red-300); box-shadow: var(--shadow-red); transform: translateY(-3px); }
     .qa-icon { font-size: 1.8rem; }
@@ -31,14 +32,25 @@
     .admin-search input { background: none; border: none; outline: none; font-size: 0.85rem; font-family: var(--font-sans); width: 180px; }
     .action-group { display: flex; gap: 6px; }
     .action-btn {
-      width: 30px; height: 30px; border-radius: 50%;
+      width: 32px; height: 32px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 0.9rem; cursor: pointer; transition: var(--transition);
       border: none; background: var(--gray-100);
     }
     .action-btn:hover { background: var(--red-100); }
     .action-btn.danger:hover { background: var(--red-100); color: var(--red-600); }
-    @media(max-width:900px){ .quick-actions{grid-template-columns:1fr 1fr;} }
+
+    @media(max-width:900px){
+      .quick-actions { grid-template-columns: 1fr 1fr; gap: 10px; }
+    }
+    @media(max-width:640px){
+      .dt-header { padding: 14px 16px; flex-direction: column; align-items: stretch; gap: 12px; }
+      .dt-controls, .dt-controls .admin-search { width: 100% !important; }
+      .dt-controls .admin-search input { width: 100% !important; }
+      .quick-action-btn { padding: 14px 10px; border-radius: var(--radius-lg); }
+      .quick-action-btn .qa-icon { font-size: 1.4rem; }
+      .quick-action-btn .qa-label { font-size: 0.76rem; }
+    }
   </style>
 </head>
 <body>
@@ -112,9 +124,9 @@
 
     <!-- TOP BAR -->
     <div class="dashboard-topbar">
-      <div style="display:flex;align-items:center;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;">
         <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Sidebar">☰</button>
-        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-title" id="topbarTitle">NSS Volunteer Dashboard</div>
       </div>
       <div class="topbar-right">
         <div class="topbar-search">
@@ -124,8 +136,9 @@
         <div class="notification-btn" onclick="handleNotificationClick()" title="Alerts">
           🔔<div class="notification-dot" id="notifDot" style="display:none;"></div>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="Auth.logout()" style="padding:6px 14px;font-size:0.82rem;gap:6px;" title="Sign out of account">
-          🚪 Logout
+        <a href="../index.html" class="btn btn-outline btn-sm topbar-portal-btn" title="View Public Portal"><span class="topbar-btn-icon">🌐</span><span class="topbar-btn-text">Portal</span></a>
+        <button class="btn btn-outline btn-sm topbar-logout-btn" onclick="Auth.logout()" title="Sign out of account">
+          <span class="topbar-btn-icon">🚪</span><span class="topbar-btn-text">Logout</span>
         </button>
         <div class="user-avatar-sm" style="cursor:pointer;" id="topbarAvatar" onclick="Auth.logout()" title="Click to Logout">A</div>
       </div>
@@ -134,7 +147,7 @@
     <!-- DASHBOARD CONTENT -->
     <div class="dashboard-content">
 
-      <div class="page-title">Good Evening 👋</div>
+      <div class="page-title" id="adminGreetingTitle">Welcome Back 👋</div>
       <p class="page-subtitle" id="adminWelcome">Welcome back, Admin! Here's what's happening with the NSS Blood Donation Portal today.</p>
 
       <!-- QUICK ACTIONS -->
@@ -284,7 +297,7 @@
           <div class="dt-controls">
             <div class="admin-search">
               <span>🔍</span>
-              <input type="text" id="volunteerSearchInput" placeholder="Filter by name, dept, or batch no…" style="width:250px;" oninput="filterVolunteersTable()">
+              <input type="text" id="volunteerSearchInput" placeholder="Filter by name, dept, or batch no…" style="width:100%;max-width:280px;" oninput="filterVolunteersTable()">
             </div>
           </div>
         </div>
@@ -325,8 +338,8 @@
 
 <div class="toast-container"></div>
 
-<script src="../js/data.js"></script>
-<script src="../js/app.js"></script>
+<script src="../js/data.js?v=2"></script>
+<script src="../js/app.js?v=2"></script>
 <script>
   // Auth guard
   const user = Auth.loadSession();
@@ -372,6 +385,12 @@
       document.getElementById('sidebarUserRole').textContent  = user.role === 'admin' ? 'Administrator' : 'NSS Volunteer';
       document.getElementById('sidebarAvatar').textContent    = user.name.charAt(0);
       document.getElementById('topbarAvatar').textContent     = user.name.charAt(0);
+      const hr = new Date().getHours();
+      const timeGreeting = hr < 12 ? 'Good Morning' : hr < 17 ? 'Good Afternoon' : 'Good Evening';
+      const greetingEl = document.getElementById('adminGreetingTitle');
+      if (greetingEl) {
+        greetingEl.textContent = `${timeGreeting}, ${user.name.split(' ')[0]} 👋`;
+      }
       document.getElementById('adminWelcome').textContent     = `Welcome back, ${user.name.split(' ')[0]}! (${user.role === 'admin' ? 'NSS Program Officer' : 'NSS Volunteer' + (user.batchNo ? ' · Batch ' + user.batchNo : '')})`;
     }
 
@@ -497,9 +516,9 @@
           </div>
         </td>
         <td>
-          <span style="font-family:monospace;font-size:0.92rem;font-weight:700;background:var(--gray-100);padding:3px 10px;border-radius:4px;color:var(--red-700);letter-spacing:0.04em;">${v.batchNo}</span>
+          <span class="batch-badge">${v.batchNo}</span>
         </td>
-        <td><span style="font-size:0.82rem;color:var(--gray-600);">${v.dept}</span></td>
+        <td><span class="dept-badge">${v.deptCode || v.dept}</span></td>
         <td>
           <span class="badge badge-success" style="font-size:0.75rem;">Active Volunteer</span>
         </td>
