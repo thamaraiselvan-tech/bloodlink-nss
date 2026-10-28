@@ -7,8 +7,51 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/dashboard.css?v=3">
   <style>
+    /* Donor Stats Grid - 3 Columns on PC, 2 on Tablet, 2-1 on Mobile */
+    .donor-stats-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 18px !important;
+      margin-bottom: 28px !important;
+    }
+    .donor-stats-grid .stat-card {
+      background: #ffffff;
+      border-radius: var(--radius-xl, 16px);
+      padding: 18px 20px;
+      display: flex !important;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.06));
+      border: 1px solid var(--gray-100, #f3f4f6);
+      transition: all 0.2s ease;
+    }
+    .donor-stats-grid .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1));
+    }
+    @media (max-width: 900px) {
+      .donor-stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 14px !important;
+        margin-bottom: 20px !important;
+      }
+      .donor-stats-grid .stat-card:last-child {
+        grid-column: 1 / -1 !important;
+      }
+    }
+    @media (max-width: 480px) {
+      .donor-stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+      }
+      .donor-stats-grid .stat-card {
+        padding: 14px 12px !important;
+        gap: 10px !important;
+      }
+    }
+
     .donor-profile-card {
       position: relative;
       background: linear-gradient(135deg, #881337 0%, #be123c 45%, #e11d48 100%);
