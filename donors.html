@@ -35,6 +35,15 @@
     .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 28px; }
     .page-btn { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: var(--transition); border: 1.5px solid var(--gray-200); color: var(--gray-600); }
     .page-btn:hover, .page-btn.active { background: var(--red-600); color: white; border-color: var(--red-600); }
+
+    @media(max-width:768px) {
+      .filters-bar { padding: 16px; gap: 12px; border-radius: var(--radius-lg); }
+      .filters-search { min-width: 100%; width: 100%; }
+      .filter-group { flex: 1 1 calc(50% - 6px); }
+      .filter-group .form-select { width: 100%; }
+      .bg-filter-chips { gap: 6px; }
+      .bg-chip { padding: 5px 12px; font-size: 0.8rem; }
+    }
   </style>
 </head>
 <body>

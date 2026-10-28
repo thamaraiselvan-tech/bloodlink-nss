@@ -10,22 +10,78 @@ if (navbar) {
   });
 }
 
-// ── Hamburger menu ────────────────────────────────────────────────
-const hamburger = document.getElementById('hamburger');
-const navLinks  = document.getElementById('navLinks');
-if (hamburger && navLinks) {
-  hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('open');
-    navLinks.classList.toggle('open');
-  });
-  // Close on nav link click (mobile)
-  navLinks.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', () => {
-      hamburger.classList.remove('open');
-      navLinks.classList.remove('open');
+// ── Mobile Sideways Off-Canvas Drawer ─────────────────────────────
+(function initMobileDrawer() {
+  const hamburger = document.getElementById('hamburger');
+  const navLinks  = document.getElementById('navLinks');
+  if (!navLinks) return;
+
+  // Create backdrop if not already in DOM
+  let backdrop = document.querySelector('.nav-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.className = 'nav-backdrop';
+    document.body.appendChild(backdrop);
+  }
+
+  // Prepend Drawer Header inside navLinks if not present
+  if (!navLinks.querySelector('.drawer-header')) {
+    const headerLi = document.createElement('li');
+    headerLi.className = 'drawer-header';
+    headerLi.innerHTML = `
+      <div class="drawer-logo">
+        <span class="logo-drop" style="font-size:1.6rem;">🩸</span>
+        <div class="logo-text">
+          <span class="logo-title">BloodLink</span>
+          <span class="logo-sub">NSS Unit</span>
+        </div>
+      </div>
+      <button class="drawer-close" id="drawerCloseBtn" aria-label="Close menu">✕</button>
+    `;
+    navLinks.insertBefore(headerLi, navLinks.firstChild);
+  }
+
+  function openDrawer() {
+    navLinks.classList.add('open');
+    backdrop.classList.add('open');
+    if (hamburger) hamburger.classList.add('open');
+    document.body.classList.add('drawer-open');
+  }
+
+  function closeDrawer() {
+    navLinks.classList.remove('open');
+    backdrop.classList.remove('open');
+    if (hamburger) hamburger.classList.remove('open');
+    document.body.classList.remove('drawer-open');
+  }
+
+  if (hamburger) {
+    hamburger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (navLinks.classList.contains('open')) closeDrawer();
+      else openDrawer();
     });
+  }
+
+  backdrop.addEventListener('click', closeDrawer);
+
+  const closeBtn = document.getElementById('drawerCloseBtn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeDrawer);
+  }
+
+  // Close when tapping any navigation link
+  navLinks.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', closeDrawer);
   });
-}
+
+  // Automatically close on resize above mobile breakpoint
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 860 && navLinks.classList.contains('open')) {
+      closeDrawer();
+    }
+  });
+})();
 
 // ── Highlight active nav link ─────────────────────────────────────
 (function() {
@@ -41,36 +97,60 @@ if (hamburger && navLinks) {
   });
 })();
 
-// ── Auth state in navbar ──────────────────────────────────────────
+// ── Auth state in navbar (Desktop & Mobile Drawer) ────────────────
 (function() {
   const user = Auth.loadSession();
   const loginBtn    = document.getElementById('loginBtn');
   const registerBtn = document.getElementById('registerBtn');
   const navActions  = document.querySelector('.nav-actions');
+  const mobileActions = document.querySelector('.mobile-nav-actions');
 
-  if (user && loginBtn && registerBtn) {
+  if (user) {
     const isVolunteerOrAdmin = (user.role === 'admin' || user.role === 'volunteer');
     const dashboardUrl = isVolunteerOrAdmin ? 'admin/index.html' : 'donor-portal.html';
+    const roleLabel = user.role === 'volunteer' 
+      ? `NSS Volunteer${user.batchNo ? ' (Batch ' + user.batchNo + ')' : ''}`
+      : user.role === 'admin' ? 'NSS Program Officer' : 'Registered Donor';
 
-    loginBtn.textContent  = `👋 ${user.name.split(' ')[0]}`;
-    loginBtn.href = dashboardUrl;
-    loginBtn.title = `Signed in as ${user.name} (${user.role === 'volunteer' ? 'Batch ' + (user.batchNo || '') : user.role})`;
+    // Desktop navbar update
+    if (loginBtn && registerBtn) {
+      loginBtn.textContent  = `👋 ${user.name.split(' ')[0]}`;
+      loginBtn.href = dashboardUrl;
+      loginBtn.title = `Signed in as ${user.name} (${roleLabel})`;
 
-    registerBtn.textContent = 'Dashboard';
-    registerBtn.href = dashboardUrl;
+      registerBtn.textContent = 'Dashboard';
+      registerBtn.href = dashboardUrl;
 
-    if (navActions && !document.getElementById('navLogoutBtn')) {
-      const logoutBtn = document.createElement('button');
-      logoutBtn.id = 'navLogoutBtn';
-      logoutBtn.className = 'btn btn-outline btn-sm';
-      logoutBtn.style.padding = '8px 16px';
-      logoutBtn.style.fontSize = '0.82rem';
-      logoutBtn.innerHTML = '🚪 Logout';
-      logoutBtn.onclick = (e) => {
-        e.preventDefault();
-        Auth.logout();
-      };
-      navActions.appendChild(logoutBtn);
+      if (navActions && !document.getElementById('navLogoutBtn')) {
+        const logoutBtn = document.createElement('button');
+        logoutBtn.id = 'navLogoutBtn';
+        logoutBtn.className = 'btn btn-outline btn-sm';
+        logoutBtn.style.padding = '8px 16px';
+        logoutBtn.style.fontSize = '0.82rem';
+        logoutBtn.innerHTML = '🚪 Logout';
+        logoutBtn.onclick = (e) => {
+          e.preventDefault();
+          Auth.logout();
+        };
+        navActions.appendChild(logoutBtn);
+      }
+    }
+
+    // Mobile drawer actions update
+    if (mobileActions) {
+      mobileActions.innerHTML = `
+        <div class="mobile-user-card">
+          <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--red-600),var(--red-400));color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.95rem;flex-shrink:0;">
+            ${user.name.charAt(0)}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.9rem;font-weight:700;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${user.name}</div>
+            <div style="font-size:0.75rem;color:var(--gray-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roleLabel}</div>
+          </div>
+        </div>
+        <a href="${dashboardUrl}" class="btn btn-primary btn-block">Go to Dashboard →</a>
+        <button class="btn btn-outline btn-block" onclick="Auth.logout()" style="font-size:0.88rem;">🚪 Sign Out</button>
+      `;
     }
   }
 })();

@@ -77,10 +77,14 @@
       </div>
     </div>
   </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <main class="dashboard-main">
     <div class="dashboard-topbar">
-      <div class="topbar-title">Donor Dashboard</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Sidebar">☰</button>
+        <div class="topbar-title">Donor Dashboard</div>
+      </div>
       <div class="topbar-right">
         <a href="index.html" class="btn btn-outline btn-sm">View Portal</a>
         <button class="btn btn-outline btn-sm" onclick="Auth.logout()" style="gap:4px;">🚪 Logout</button>
@@ -294,6 +298,28 @@
   }
 
   loadPortal();
+  // Mobile sidebar drawer
+  const sidebar = document.getElementById('sidebar');
+  const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+  const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+  if (sidebarToggleBtn && sidebar && sidebarBackdrop) {
+    sidebarToggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarBackdrop.classList.toggle('open');
+    });
+    sidebarBackdrop.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarBackdrop.classList.remove('open');
+    });
+    sidebar.querySelectorAll('.sidebar-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 860) {
+          sidebar.classList.remove('open');
+          sidebarBackdrop.classList.remove('open');
+        }
+      });
+    });
+  }
 </script>
 </body>
 </html>

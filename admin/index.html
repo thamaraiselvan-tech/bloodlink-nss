@@ -105,13 +105,17 @@
       </div>
     </div>
   </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <!-- MAIN CONTENT -->
   <main class="dashboard-main">
 
     <!-- TOP BAR -->
     <div class="dashboard-topbar">
-      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Sidebar">☰</button>
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      </div>
       <div class="topbar-right">
         <div class="topbar-search">
           <span class="topbar-search-icon">🔍</span>
@@ -577,6 +581,28 @@
   });
 
   loadDashboard();
+  // Mobile sidebar drawer
+  const sidebar = document.getElementById('sidebar');
+  const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+  const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+  if (sidebarToggleBtn && sidebar && sidebarBackdrop) {
+    sidebarToggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarBackdrop.classList.toggle('open');
+    });
+    sidebarBackdrop.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarBackdrop.classList.remove('open');
+    });
+    sidebar.querySelectorAll('.sidebar-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 860) {
+          sidebar.classList.remove('open');
+          sidebarBackdrop.classList.remove('open');
+        }
+      });
+    });
+  }
 </script>
 </body>
 </html>
