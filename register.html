@@ -440,11 +440,12 @@
             } catch (e) {}
           }
 
-          // 2. Create or update User in UserStore for login
+          // 2. Create or update User in UserStore & Cloud Firestore for login
           const userAccount = {
             id: 'donor_' + savedDonor.id,
             name: savedDonor.name,
-            username: email,
+            username: savedDonor.rollNo,
+            batchNo: savedDonor.rollNo,
             email: email,
             phone: savedDonor.phone,
             rollNo: savedDonor.rollNo,
@@ -459,6 +460,9 @@
 
           if (typeof UserStore !== 'undefined') {
             UserStore.add(userAccount);
+          }
+          if (typeof CloudSync !== 'undefined' && CloudSync.saveUser) {
+            CloudSync.saveUser(userAccount);
           } else {
             // Direct localStorage fallback in case of cached script
             let customUsers = [];
