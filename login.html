@@ -186,82 +186,13 @@
       if (!user) {
         btn.textContent = 'Sign In';
         btn.disabled = false;
-
-        // Friendly diagnosis for failed login:
-        const idClean = identifier.toLowerCase();
-        const idDigits = idClean.replace(/\D/g, '');
-        const allDonors = (typeof DonorStore !== 'undefined') ? DonorStore.getAll() : [];
-        const matchingDonor = allDonors.find(d => {
-          if (!d) return false;
-          const dEmail = (d.email || '').toString().toLowerCase();
-          const dRoll = (d.rollNo || '').toString().toLowerCase();
-          const dPhoneDigits = (d.phone || '').toString().replace(/\D/g, '');
-          return (
-            (dEmail && dEmail === idClean) ||
-            (dRoll && dRoll === idClean) ||
-            (dPhoneDigits && idDigits && dPhoneDigits.endsWith(idDigits) && idDigits.length >= 10)
-          );
-        });
-
-        const allUsers = (typeof UserStore !== 'undefined') ? UserStore.getAll() : [];
-        const userExists = allUsers.some(u => {
-          if (!u) return false;
-          const uEmail = (u.email || '').toString().toLowerCase();
-          const uUsername = (u.username || '').toString().toLowerCase();
-          const uBatch = (u.batchNo || '').toString().toLowerCase();
-          const uRoll = (u.rollNo || '').toString().toLowerCase();
-          const uPhoneDigits = (u.phone || '').toString().replace(/\D/g, '');
-          return (
-            (uEmail && uEmail === idClean) ||
-            (uUsername && uUsername === idClean) ||
-            (uBatch && uBatch === idClean) ||
-            (uRoll && uRoll === idClean) ||
-            (uPhoneDigits && idDigits && uPhoneDigits.endsWith(idDigits) && idDigits.length >= 10)
-          );
-        });
-
-        if (matchingDonor && !userExists) {
-          if (pass.length >= 4) {
-            // Instantly activate password and login
-            const newAcc = {
-              id: 'donor_' + matchingDonor.id,
-              name: matchingDonor.name,
-              username: identifier,
-              email: matchingDonor.email || identifier,
-              phone: matchingDonor.phone,
-              rollNo: matchingDonor.rollNo,
-              password: pass,
-              role: 'donor',
-              donorId: matchingDonor.id,
-              dept: matchingDonor.dept,
-              deptCode: matchingDonor.dept,
-              blood: matchingDonor.blood,
-              year: matchingDonor.year
-            };
-            if (typeof UserStore !== 'undefined') UserStore.add(newAcc);
-            if (typeof CloudSync !== 'undefined' && CloudSync.saveUser) CloudSync.saveUser(newAcc);
-            user = newAcc;
-            Auth.currentUser = newAcc;
-            localStorage.setItem('bloodlink_user', JSON.stringify(newAcc));
-            showToast(`Password activated successfully! Welcome, ${user.name.split(' ')[0]}! 🎉`, 'success');
-            setTimeout(() => {
-              const isFile = window.location.protocol === 'file:';
-              window.location.href = isFile ? 'donor-portal.html' : '/donor-portal.html';
-            }, 800);
-            return;
-          } else {
-            showFieldError('loginPassword', 'Please enter a password with at least 4 characters to activate your account.');
-            return;
-          }
-        } else if (userExists) {
-          showFieldError('loginPassword', 'Invalid password. Please double check your password.');
-          showToast('Invalid password. Please try again.', 'error');
-        } else {
-          showFieldError('loginPassword', role === 'volunteer' ? 'Invalid username or password.' : 'Invalid credentials. Please check your Batch No., Email, or password.');
-          showToast('Login failed. Check your credentials.', 'error');
-        }
+        showFieldError('loginPassword', role === 'volunteer' 
+          ? 'Invalid username or password.' 
+          : 'Invalid credentials. Please check your Batch No., Email, or password.');
+        showToast('Invalid credentials. Access denied.', 'error');
         return;
       }
+
       showToast(`Welcome back, ${user.name.split(' ')[0]}! 🎉`, 'success');
       setTimeout(() => {
         const isFile = window.location.protocol === 'file:';
