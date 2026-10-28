@@ -148,6 +148,9 @@ const UserStore = {
       custom.push(user);
     }
     this.saveCustomUsers(custom);
+    if (typeof CloudSync !== 'undefined' && CloudSync.saveUser) {
+      CloudSync.saveUser(user);
+    }
     return user;
   },
 
@@ -157,6 +160,9 @@ const UserStore = {
     if (idx > -1) {
       custom[idx] = { ...custom[idx], ...updates };
       this.saveCustomUsers(custom);
+      if (typeof CloudSync !== 'undefined' && CloudSync.saveUser) {
+        CloudSync.saveUser(custom[idx]);
+      }
       return custom[idx];
     }
     return null;
@@ -165,11 +171,17 @@ const UserStore = {
   delete(id) {
     const custom = this.getCustomUsers().filter(u => u.id !== id);
     this.saveCustomUsers(custom);
+    if (typeof CloudSync !== 'undefined' && CloudSync.deleteUser) {
+      CloudSync.deleteUser(id);
+    }
   },
 
   deleteByDonorId(donorId) {
     const custom = this.getCustomUsers().filter(u => String(u.donorId) !== String(donorId));
     this.saveCustomUsers(custom);
+    if (typeof CloudSync !== 'undefined' && CloudSync.deleteUserByDonorId) {
+      CloudSync.deleteUserByDonorId(donorId);
+    }
   }
 };
 
@@ -274,6 +286,43 @@ const Auth = {
     return null;
   },
 
+  async loginRemote(identifier, password) {
+    if (typeof isFirebaseReady === 'undefined' || !isFirebaseReady || typeof db === 'undefined' || !db) return null;
+    const idClean = (identifier || '').toString().trim().toLowerCase();
+    const idCleanDigits = idClean.replace(/\D/g, '');
+    const passClean = (password || '').toString();
+
+    try {
+      const snapshot = await db.collection('users').get();
+      let matchedUser = null;
+      const cloudUsers = [];
+      snapshot.forEach(doc => {
+        const u = doc.data();
+        cloudUsers.push(u);
+        const matchBatch    = (u.batchNo || '').toString().toLowerCase() === idClean;
+        const matchUsername = (u.username || '').toString().toLowerCase() === idClean;
+        const matchEmail    = (u.email || '').toString().toLowerCase() === idClean;
+        const uPhoneDigits  = (u.phone || '').toString().replace(/\D/g, '');
+        const matchPhone    = (uPhoneDigits && idCleanDigits && uPhoneDigits.endsWith(idCleanDigits) && idCleanDigits.length >= 10);
+        const matchRoll     = (u.rollNo || '').toString().toLowerCase() === idClean;
+        if ((matchBatch || matchUsername || matchEmail || matchPhone || matchRoll) && u.password === passClean) {
+          matchedUser = u;
+        }
+      });
+      if (cloudUsers.length > 0) {
+        localStorage.setItem('bloodlink_users', JSON.stringify(cloudUsers));
+      }
+      if (matchedUser) {
+        this.currentUser = matchedUser;
+        localStorage.setItem('bloodlink_user', JSON.stringify(matchedUser));
+        return matchedUser;
+      }
+    } catch (err) {
+      console.warn('loginRemote lookup warning:', err);
+    }
+    return null;
+  },
+
   logout() {
     this.currentUser = null;
     localStorage.removeItem('bloodlink_user');
@@ -317,22 +366,31 @@ const DonorStore = {
   },
   add(donor) {
     const donors = this.getAll();
-    donor.id = Date.now();
+    if (!donor.id) donor.id = Date.now();
     donors.push(donor);
     this.save(donors);
+    if (typeof CloudSync !== 'undefined' && CloudSync.saveDonor) {
+      CloudSync.saveDonor(donor);
+    }
     return donor;
   },
   update(id, updates) {
     const donors = this.getAll();
-    const idx = donors.findIndex(d => d.id === id);
+    const idx = donors.findIndex(d => String(d.id) === String(id));
     if (idx > -1) {
       donors[idx] = { ...donors[idx], ...updates };
       this.save(donors);
+      if (typeof CloudSync !== 'undefined' && CloudSync.saveDonor) {
+        CloudSync.saveDonor(donors[idx]);
+      }
     }
   },
   delete(id) {
-    const donors = this.getAll().filter(d => d.id !== id);
+    const donors = this.getAll().filter(d => String(d.id) !== String(id));
     this.save(donors);
+    if (typeof CloudSync !== 'undefined' && CloudSync.deleteDonor) {
+      CloudSync.deleteDonor(id);
+    }
   },
   clearAll() {
     this.save([]);
@@ -399,6 +457,9 @@ const ActivityStore = {
     };
     activities.unshift(newActivity);
     this.save(activities.slice(0, 30));
+    if (typeof CloudSync !== 'undefined' && CloudSync.logActivity) {
+      CloudSync.logActivity(newActivity);
+    }
     return newActivity;
   }
 };

@@ -106,6 +106,10 @@
 <!-- Toast container -->
 <div class="toast-container"></div>
 
+<!-- Firebase Cloud Database SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
 <script src="js/data.js?v=2"></script>
 <script src="js/app.js?v=2"></script>
 <script>
@@ -176,8 +180,13 @@
     btn.textContent = 'Signing in…';
     btn.disabled = true;
 
-    setTimeout(() => {
-      const user = Auth.login(identifier, pass);
+    setTimeout(async () => {
+      let user = Auth.login(identifier, pass);
+      if (!user && typeof Auth.loginRemote === 'function') {
+        try {
+          user = await Auth.loginRemote(identifier, pass);
+        } catch (e) {}
+      }
       if (!user) {
         btn.textContent = 'Sign In';
         btn.disabled = false;
