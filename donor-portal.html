@@ -202,7 +202,21 @@
   const user = Auth.loadSession();
   if (!user) { window.location.href = 'login.html'; }
 
-  let myDonorData = user?.donorId ? DonorStore.getAll().find(d => d.id === user.donorId) : DonorStore.getAll()[0]; // demo fallback
+  const allDonors = DonorStore.getAll();
+  let myDonorData = null;
+  if (user?.donorId) {
+    myDonorData = allDonors.find(d => String(d.id) === String(user.donorId));
+  }
+  if (!myDonorData && user) {
+    myDonorData = allDonors.find(d => 
+      (user.rollNo && d.rollNo && d.rollNo.toUpperCase() === user.rollNo.toUpperCase()) ||
+      (user.email && d.email && d.email.toLowerCase() === user.email.toLowerCase()) ||
+      (user.phone && d.phone && d.phone.replace(/\D/g, '') === user.phone.replace(/\D/g, ''))
+    );
+  }
+  if (!myDonorData) {
+    myDonorData = allDonors[0]; // demo fallback if no records at all
+  }
 
   function loadPortal() {
     if (!user) return;

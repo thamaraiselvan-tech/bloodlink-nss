@@ -546,6 +546,9 @@
   document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
     if (deleteTargetId) {
       DonorStore.delete(deleteTargetId);
+      if (typeof UserStore !== 'undefined') {
+        UserStore.deleteByDonorId(deleteTargetId);
+      }
       closeModal('deleteModal');
       loadDashboard();
       showToast('Donor removed successfully.', 'success');

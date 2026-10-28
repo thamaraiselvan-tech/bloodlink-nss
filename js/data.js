@@ -72,6 +72,107 @@ const NSS_VOLUNTEERS = [
   { id: 56, name: 'MARI ESWARAN V',          batchNo: '286035', dept: 'Mechanical Engineering',                        deptCode: 'MECH' },
 ];
 
+// ── User store (localStorage) ─────────────────────────────────────
+const UserStore = {
+  getDefaultUsers() {
+    return [
+      {
+        id: 'admin',
+        name: 'NSS Program Officer',
+        username: 'admin',
+        batchNo: 'admin',
+        email: 'admin@college.edu',
+        password: 'admin123',
+        role: 'admin',
+        donorId: null
+      },
+      ...NSS_VOLUNTEERS.map(v => ({
+        id: v.id,
+        name: v.name,
+        username: v.batchNo,
+        password: v.batchNo,
+        batchNo: v.batchNo,
+        email: `${v.batchNo}@college.edu`,
+        role: 'volunteer',
+        dept: v.dept,
+        deptCode: v.deptCode,
+        donorId: null
+      }))
+    ];
+  },
+
+  getCustomUsers() {
+    const stored = localStorage.getItem('bloodlink_users');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  },
+
+  saveCustomUsers(users) {
+    localStorage.setItem('bloodlink_users', JSON.stringify(users));
+  },
+
+  getAll() {
+    const defaults = this.getDefaultUsers();
+    const customs = this.getCustomUsers();
+    return [...defaults, ...customs];
+  },
+
+  add(user) {
+    const custom = this.getCustomUsers();
+    const userEmail = (user.email || '').toString().toLowerCase().trim();
+    const userRoll = (user.rollNo || '').toString().toUpperCase().trim();
+    const userPhoneDigits = (user.phone || '').toString().replace(/\D/g, '');
+
+    const existingIdx = custom.findIndex(u => {
+      const uEmail = (u.email || '').toString().toLowerCase().trim();
+      const uRoll = (u.rollNo || '').toString().toUpperCase().trim();
+      const uPhoneDigits = (u.phone || '').toString().replace(/\D/g, '');
+      return (
+        (u.id && user.id && u.id === user.id) ||
+        (uEmail && userEmail && uEmail === userEmail) ||
+        (uRoll && userRoll && uRoll === userRoll) ||
+        (uPhoneDigits && userPhoneDigits && uPhoneDigits.endsWith(userPhoneDigits) && userPhoneDigits.length >= 10)
+      );
+    });
+
+    if (existingIdx > -1) {
+      custom[existingIdx] = { ...custom[existingIdx], ...user };
+    } else {
+      if (!user.id) user.id = 'donor_' + Date.now();
+      custom.push(user);
+    }
+    this.saveCustomUsers(custom);
+    return user;
+  },
+
+  update(id, updates) {
+    const custom = this.getCustomUsers();
+    const idx = custom.findIndex(u => u.id === id);
+    if (idx > -1) {
+      custom[idx] = { ...custom[idx], ...updates };
+      this.saveCustomUsers(custom);
+      return custom[idx];
+    }
+    return null;
+  },
+
+  delete(id) {
+    const custom = this.getCustomUsers().filter(u => u.id !== id);
+    this.saveCustomUsers(custom);
+  },
+
+  deleteByDonorId(donorId) {
+    const custom = this.getCustomUsers().filter(u => String(u.donorId) !== String(donorId));
+    this.saveCustomUsers(custom);
+  }
+};
+
 const DB = {
   // ── Blood Groups ──────────────────────────────────────────────
   bloodGroups: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-', 'A1+', 'A1-', 'A1B+', 'A1B-'],
@@ -139,31 +240,10 @@ const DB = {
     'A1B+': { canDonateTo: ['A1B+','AB+'],                                                        canReceiveFrom: ['O-','O+','A-','A+','A1-','A1+','B-','B+','AB-','AB+','A1B-','A1B+'] },
   },
 
-  // ── Users (System Admin + 56 NSS Volunteers) ─────────────────
-  users: [
-    {
-      id: 'admin',
-      name: 'NSS Program Officer',
-      username: 'admin',
-      batchNo: 'admin',
-      email: 'admin@college.edu',
-      password: 'admin123',
-      role: 'admin',
-      donorId: null
-    },
-    ...NSS_VOLUNTEERS.map(v => ({
-      id: v.id,
-      name: v.name,
-      username: v.batchNo,
-      password: v.batchNo,
-      batchNo: v.batchNo,
-      email: `${v.batchNo}@college.edu`,
-      role: 'volunteer',
-      dept: v.dept,
-      deptCode: v.deptCode,
-      donorId: null
-    }))
-  ],
+  // ── Users (System Admin + 56 NSS Volunteers + Registered Donors) ──
+  get users() {
+    return UserStore.getAll();
+  }
 };
 
 // ── Auth helpers ─────────────────────────────────────────────────
@@ -172,14 +252,18 @@ const Auth = {
 
   login(identifier, password) {
     const idClean = (identifier || '').toString().trim().toLowerCase();
+    const idCleanDigits = idClean.replace(/\D/g, '');
     const passClean = (password || '').toString();
 
-    // Match by batchNo, username, or email
-    const user = DB.users.find(u => {
+    // Match by batchNo, username, email, phone, or rollNo
+    const user = UserStore.getAll().find(u => {
       const matchBatch    = (u.batchNo || '').toString().toLowerCase() === idClean;
       const matchUsername = (u.username || '').toString().toLowerCase() === idClean;
       const matchEmail    = (u.email || '').toString().toLowerCase() === idClean;
-      return (matchBatch || matchUsername || matchEmail) && u.password === passClean;
+      const uPhoneDigits  = (u.phone || '').toString().replace(/\D/g, '');
+      const matchPhone    = (uPhoneDigits && idCleanDigits && uPhoneDigits.endsWith(idCleanDigits) && idCleanDigits.length >= 10);
+      const matchRoll     = (u.rollNo || '').toString().toLowerCase() === idClean;
+      return (matchBatch || matchUsername || matchEmail || matchPhone || matchRoll) && u.password === passClean;
     });
 
     if (user) {

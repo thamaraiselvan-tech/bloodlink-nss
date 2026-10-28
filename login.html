@@ -122,12 +122,29 @@
       passInput.placeholder = 'Enter your Batch No. as password';
       hint.style.display = 'block';
     } else {
-      label.textContent = 'Email Address or Phone';
-      input.placeholder = 'your@college.edu or phone number';
+      label.textContent = 'Email, Roll No, or Phone';
+      input.placeholder = 'e.g. your@college.edu or Roll No / Phone';
       passInput.placeholder = 'Enter your password';
       hint.style.display = 'none';
     }
   }
+
+  // Initialize placeholder on load
+  const initRole = document.querySelector('input[name="role"]:checked')?.value || 'donor';
+  updateFormPlaceholders(initRole);
+
+  // Check for prefill from registration
+  try {
+    const prefillEmail = sessionStorage.getItem('prefill_login_email');
+    if (prefillEmail) {
+      const emailField = document.getElementById('loginEmail');
+      if (emailField) {
+        emailField.value = prefillEmail;
+        document.getElementById('loginPassword')?.focus();
+      }
+      sessionStorage.removeItem('prefill_login_email');
+    }
+  } catch (err) {}
 
   document.querySelectorAll('input[name="role"]').forEach(radio => {
     radio.addEventListener('change', (e) => updateFormPlaceholders(e.target.value));
@@ -140,7 +157,7 @@
     const role       = document.querySelector('input[name="role"]:checked').value;
 
     if (!identifier) {
-      showFieldError('loginEmail', role === 'volunteer' ? 'Please enter your Batch Number.' : 'Please enter your Email or Username.');
+      showFieldError('loginEmail', role === 'volunteer' ? 'Please enter your Batch Number.' : 'Please enter your Email, Roll Number, or Phone.');
       return;
     }
     if (identifier.includes('@') && !validateEmail(identifier)) {
@@ -164,8 +181,33 @@
       if (!user) {
         btn.textContent = 'Sign In';
         btn.disabled = false;
-        showFieldError('loginPassword', 'Invalid credentials. Please check your batch number or password.');
-        showToast('Login failed. Check your credentials.', 'error');
+
+        // Friendly diagnosis for failed login:
+        const idClean = identifier.toLowerCase();
+        const idDigits = idClean.replace(/\D/g, '');
+        const matchingDonor = DonorStore.getAll().find(d => 
+          (d.email && d.email.toLowerCase() === idClean) ||
+          (d.rollNo && d.rollNo.toLowerCase() === idClean) ||
+          (d.phone && idDigits && d.phone.replace(/\D/g, '').endsWith(idDigits) && idDigits.length >= 10)
+        );
+        const userExists = UserStore.getAll().some(u => 
+          (u.email && u.email.toLowerCase() === idClean) ||
+          (u.username && u.username.toLowerCase() === idClean) ||
+          (u.batchNo && u.batchNo.toLowerCase() === idClean) ||
+          (u.rollNo && u.rollNo.toLowerCase() === idClean) ||
+          (u.phone && idDigits && u.phone.replace(/\D/g, '').endsWith(idDigits) && idDigits.length >= 10)
+        );
+
+        if (matchingDonor && !userExists) {
+          showFieldError('loginPassword', `Donor profile found for ${matchingDonor.name}, but login password was not set in earlier version. Please re-register once on the registration page to set your password.`);
+          showToast('Account password not set. Please re-register once.', 'warning', 6000);
+        } else if (userExists) {
+          showFieldError('loginPassword', 'Invalid password. Please double check your password.');
+          showToast('Invalid password. Please try again.', 'error');
+        } else {
+          showFieldError('loginPassword', role === 'volunteer' ? 'Invalid credentials. Please check your batch number or password.' : 'Invalid credentials. No donor account found for this email, roll number, or phone.');
+          showToast('Login failed. Check your credentials.', 'error');
+        }
         return;
       }
       showToast(`Welcome back, ${user.name.split(' ')[0]}! 🎉`, 'success');

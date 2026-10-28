@@ -340,29 +340,113 @@
     btn.textContent = 'Registering…';
     btn.disabled = true;
 
-    const donor = {
-      name:        `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`,
-      rollNo:      document.getElementById('rollNo').value.toUpperCase(),
-      dept:        document.getElementById('department').value.match(/\((\w+)\)/)?.[1] || document.getElementById('department').value,
-      year:        document.getElementById('year').value,
-      blood:       document.querySelector('input[name="bloodGroup"]:checked')?.value || 'Unknown',
-      phone:       document.getElementById('phone').value,
-      lastDonated: document.getElementById('lastDonated').value || null,
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName  = document.getElementById('lastName').value.trim();
+    const fullName  = `${firstName} ${lastName}`.trim();
+    const rollNo    = document.getElementById('rollNo').value.trim().toUpperCase();
+    const deptVal   = document.getElementById('department').value;
+    const deptCode  = deptVal.match(/\((\w+)\)/)?.[1] || deptVal;
+    const year      = document.getElementById('year').value;
+    const blood     = document.querySelector('input[name="bloodGroup"]:checked')?.value || 'Unknown';
+    const phone     = document.getElementById('phone').value.trim();
+    const dob       = document.getElementById('dob').value;
+    const weight    = document.getElementById('weight').value;
+    const lastDon   = document.getElementById('lastDonated').value || null;
+
+    const avlWeekdays  = document.getElementById('avlWeekdays')?.checked ?? true;
+    const avlWeekends  = document.getElementById('avlWeekends')?.checked ?? true;
+    const avlEmergency = document.getElementById('avlEmergency')?.checked ?? true;
+
+    const medConditions = [];
+    if (document.getElementById('medDiabetes')?.checked) medConditions.push('Diabetes');
+    if (document.getElementById('medHypertension')?.checked) medConditions.push('Hypertension');
+    if (document.getElementById('medAsthma')?.checked) medConditions.push('Asthma');
+    if (document.getElementById('medOther')?.checked) medConditions.push('Other');
+
+    const donorData = {
+      name:        fullName,
+      rollNo:      rollNo,
+      dept:        deptCode,
+      department:  deptVal,
+      year:        year,
+      blood:       blood,
+      phone:       phone,
+      email:       email,
+      dob:         dob,
+      weight:      weight,
+      lastDonated: lastDon,
       donations:   0,
       available:   true,
+      availability: {
+        weekdays: avlWeekdays,
+        weekends: avlWeekends,
+        emergency: avlEmergency
+      },
+      medicalConditions: medConditions,
       city:        'Chennai',
+      registeredAt: new Date().toISOString()
     };
 
     setTimeout(() => {
-      DonorStore.add(donor);
+      // 1. Save or update Donor in DonorStore
+      const allDonors = DonorStore.getAll();
+      const existingDonor = allDonors.find(d => 
+        (d.rollNo && d.rollNo.toUpperCase() === rollNo) ||
+        (d.phone && d.phone.replace(/\D/g, '') === phone.replace(/\D/g, '')) ||
+        (d.email && d.email.toLowerCase() === email.toLowerCase())
+      );
+
+      let savedDonor;
+      if (existingDonor) {
+        DonorStore.update(existingDonor.id, donorData);
+        savedDonor = { ...existingDonor, ...donorData };
+      } else {
+        savedDonor = DonorStore.add(donorData);
+      }
+
+      // 2. Create or update User in UserStore for login
+      const userAccount = {
+        id: 'donor_' + savedDonor.id,
+        name: savedDonor.name,
+        username: email,
+        email: email,
+        phone: savedDonor.phone,
+        rollNo: savedDonor.rollNo,
+        password: pass,
+        role: 'donor',
+        donorId: savedDonor.id,
+        dept: savedDonor.dept,
+        deptCode: savedDonor.dept,
+        blood: savedDonor.blood,
+        year: savedDonor.year
+      };
+      UserStore.add(userAccount);
+
+      // 3. Record Activity for NSS Admin dashboard
+      ActivityStore.add({
+        type: 'register',
+        icon: '🩸',
+        title: 'New Donor Registered',
+        desc: `${savedDonor.name} (${savedDonor.blood}, ${savedDonor.dept}) registered as a blood donor.`
+      });
+
+      // 4. Remember email for login convenience
+      try {
+        sessionStorage.setItem('prefill_login_email', email);
+      } catch (err) {}
+
+      btn.textContent = 'Register Now 🩸';
+      btn.disabled = false;
+
       document.getElementById('successSummary').innerHTML =
-        `<strong>Name:</strong> ${donor.name}<br>
-         <strong>Roll No:</strong> ${donor.rollNo}<br>
-         <strong>Department:</strong> ${donor.dept}<br>
-         <strong>Blood Group:</strong> ${donor.blood}<br>
-         <strong>Email:</strong> ${email}`;
+        `<strong>Name:</strong> ${savedDonor.name}<br>
+         <strong>Roll No:</strong> ${savedDonor.rollNo}<br>
+         <strong>Department:</strong> ${savedDonor.dept}<br>
+         <strong>Blood Group:</strong> ${savedDonor.blood}<br>
+         <strong>Email:</strong> ${email}<br>
+         <span style="color:var(--green-600);font-weight:600;display:inline-block;margin-top:6px;">✓ Account created! You can now log in with your email/phone and password.</span>`;
       openModal('successModal');
-    }, 1000);
+    }, 800);
   });
 </script>
 </body>

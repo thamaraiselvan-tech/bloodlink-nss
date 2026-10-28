@@ -221,11 +221,11 @@
       const avail = document.getElementById('availFilter').value;
       return DonorStore.getAll().filter(d => {
         if (activeBG && d.blood !== activeBG) return false;
-        if (dept  && !d.dept.includes(dept)) return false;
+        if (dept  && !(d.dept || '').includes(dept)) return false;
         if (year  && d.year !== year) return false;
         if (avail === 'true'  && !d.available) return false;
         if (avail === 'false' &&  d.available) return false;
-        if (q && !d.name.toLowerCase().includes(q) && !d.rollNo.toLowerCase().includes(q)) return false;
+        if (q && !(d.name || '').toLowerCase().includes(q) && !(d.rollNo || '').toLowerCase().includes(q)) return false;
         return true;
       });
     }
