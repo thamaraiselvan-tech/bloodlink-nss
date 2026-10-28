@@ -74,6 +74,28 @@ const CloudSync = {
       }
     }, (error) => console.warn('CloudSync users listener warning:', error));
 
+    // Auto-sync any existing local registrations to Cloud Firestore
+    try {
+      const localDonors = JSON.parse(localStorage.getItem('bloodlink_donors') || '[]');
+      if (Array.isArray(localDonors) && localDonors.length > 0) {
+        localDonors.forEach(d => {
+          if (d && d.id) {
+            db.collection('donors').doc(String(d.id)).set(d, { merge: true });
+          }
+        });
+      }
+      const localUsers = JSON.parse(localStorage.getItem('bloodlink_users') || '[]');
+      if (Array.isArray(localUsers) && localUsers.length > 0) {
+        localUsers.forEach(u => {
+          if (u && u.id && u.role === 'donor') {
+            db.collection('users').doc(String(u.id)).set(u, { merge: true });
+          }
+        });
+      }
+    } catch (syncErr) {
+      console.warn('Initial cloud upload sync notice:', syncErr);
+    }
+
     // Realtime listener for Recent Activities
     db.collection('activities').orderBy('timestamp', 'desc').limit(30).onSnapshot((snapshot) => {
       const activities = [];
