@@ -2,11 +2,12 @@
 // BloodLink NSS Portal — Shared Data Store & Authentic NSS Volunteer Credentials
 // ================================================================
 
-// Clean reset for testing data: starts donors completely empty
-if (!localStorage.getItem('bloodlink_clean_v2')) {
+// Clean reset: purge stale test donor users and sessions from browser localStorage
+if (!localStorage.getItem('bloodlink_clean_v3')) {
   localStorage.setItem('bloodlink_donors', '[]');
+  localStorage.removeItem('bloodlink_users');
   localStorage.removeItem('bloodlink_user');
-  localStorage.setItem('bloodlink_clean_v2', 'true');
+  localStorage.setItem('bloodlink_clean_v3', 'true');
 }
 
 // ── Official NSS Volunteers List ──────────────────────────────────
@@ -274,16 +275,24 @@ const DB = {
 const Auth = {
   currentUser: null,
 
-  login(identifier, password) {
+  login(identifier, password, expectedRole = null) {
     if (!identifier || !password) return null;
     const idClean = (identifier || '').toString().trim().toLowerCase();
     const idCleanDigits = idClean.replace(/\D/g, '');
     const embeddedRoll = (idClean.match(/\d{5,8}/)?.[0]) || '';
     const passClean = (password || '').toString();
 
-    // STRICT: Look for exact user matching identifier AND exact matching password
+    // STRICT: Look for exact user matching identifier AND exact matching password AND matching role
     const user = UserStore.getAll().find(u => {
       if (!u || !u.password) return false;
+
+      // Role isolation:
+      if (expectedRole === 'volunteer') {
+        if (u.role !== 'volunteer' && u.role !== 'admin') return false;
+      } else if (expectedRole === 'donor') {
+        if (u.role !== 'donor') return false;
+      }
+
       const matchBatch    = (u.batchNo || '').toString().toLowerCase() === idClean;
       const matchUsername = (u.username || '').toString().toLowerCase() === idClean;
       const matchEmail    = (u.email || '').toString().toLowerCase() === idClean;
@@ -304,7 +313,7 @@ const Auth = {
     return null;
   },
 
-  async loginRemote(identifier, password) {
+  async loginRemote(identifier, password, expectedRole = null) {
     if (!identifier || !password) return null;
     if (typeof isFirebaseReady === 'undefined' || !isFirebaseReady || typeof db === 'undefined' || !db) return null;
     const idClean = (identifier || '').toString().trim().toLowerCase();
@@ -326,6 +335,9 @@ const Auth = {
           const uPhoneDigits  = (u.phone || '').toString().replace(/\D/g, '');
           const matchPhone    = (uPhoneDigits && idCleanDigits && uPhoneDigits.endsWith(idCleanDigits) && idCleanDigits.length >= 10);
           const matchRoll     = (u.rollNo || '').toString().toLowerCase() === idClean || (embeddedRoll && (u.rollNo || '').toString().toLowerCase() === embeddedRoll);
+          if (expectedRole === 'volunteer' && u.role !== 'volunteer' && u.role !== 'admin') return;
+          if (expectedRole === 'donor' && u.role !== 'donor') return;
+
           const idMatches     = matchBatch || matchUsername || matchEmail || matchPhone || matchRoll;
 
           // STRICT: Password must match exactly.
