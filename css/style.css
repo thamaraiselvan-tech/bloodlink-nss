@@ -205,11 +205,11 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 clamp(20px, 3.5vw, 44px);
+  padding: 0 clamp(16px, 2.5vw, 44px);
   height: 100%;
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: clamp(12px, 2vw, 32px);
 }
 .nav-logo {
   display: flex;
@@ -252,18 +252,23 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: clamp(0px, 0.3vw, 4px);
   flex: 1;
   justify-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 .nav-link {
-  padding: 8px 16px;
+  padding: 8px clamp(8px, 1vw, 16px);
   border-radius: var(--radius-full);
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 0.85vw, 0.9rem);
   font-weight: 500;
   color: var(--gray-600);
   transition: var(--transition);
   position: relative;
+  white-space: nowrap;
+  text-decoration: none;
 }
 .nav-link:hover {
   color: var(--red-700);
@@ -283,7 +288,17 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   border-radius: 99px;
 }
 
-.nav-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 0.6vw, 10px);
+  flex-shrink: 0;
+}
+.nav-actions .btn {
+  white-space: nowrap;
+  font-size: clamp(0.78rem, 0.82vw, 0.88rem);
+  padding: 9px clamp(14px, 1.2vw, 22px);
+}
 
 .hamburger {
   display: none;
@@ -656,10 +671,20 @@ tbody tr:last-child td { border-bottom: none; }
 .mobile-nav-actions { display: none; }
 .drawer-header { display: none; }
 
-@media (min-width: 861px) {
+@media (min-width: 961px) {
   .drawer-header { display: none !important; }
   .mobile-nav-actions { display: none !important; }
   .nav-backdrop { display: none !important; }
+}
+
+/* Intermediate breakpoint — tighten navbar on mid-size screens */
+@media (max-width: 1200px) and (min-width: 961px) {
+  .nav-container { gap: 10px; }
+  .nav-link { padding: 7px 10px; font-size: 0.82rem; }
+  .nav-links { gap: 1px; }
+  .nav-actions .btn { padding: 8px 14px; font-size: 0.8rem; }
+  .nav-actions { gap: 6px; }
+  .logo-title { font-size: 1.05rem; }
 }
 /* Mobile Drawer Backdrop */
 .nav-backdrop {
@@ -685,7 +710,7 @@ body.drawer-open {
   .footer-grid { grid-template-columns: 1fr 1fr; }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 960px) {
   section { padding: 56px 0; }
 
   /* Elevate navbar stacking context above backdrop when drawer is open */
@@ -852,4 +877,5 @@ body.drawer-open {
 
 @media (max-width: 480px) {
   .nav-links { width: 290px; max-width: 88vw; }
+  .nav-link { font-size: 0.92rem; padding: 12px 14px; }
 }

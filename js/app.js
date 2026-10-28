@@ -101,7 +101,7 @@ if (navbar) {
 
   // Automatically close on resize above mobile breakpoint
   window.addEventListener('resize', () => {
-    if (window.innerWidth > 860 && navLinks.classList.contains('open')) {
+    if (window.innerWidth > 960 && navLinks.classList.contains('open')) {
       closeDrawer();
     }
   });
