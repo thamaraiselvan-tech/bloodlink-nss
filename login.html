@@ -108,9 +108,9 @@
 <!-- Firebase Cloud Database SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<script src="js/firebase-config.js"></script>
-<script src="js/data.js?v=2"></script>
-<script src="js/app.js?v=2"></script>
+<script src="js/firebase-config.js?v=3"></script>
+<script src="js/data.js?v=3"></script>
+<script src="js/app.js?v=3"></script>
 <script>
 
 
@@ -221,8 +221,38 @@
         });
 
         if (matchingDonor && !userExists) {
-          showFieldError('loginPassword', `Donor profile found for ${matchingDonor.name}, but login password was not set in earlier version. Please re-register once on the registration page to set your password.`);
-          showToast('Account password not set. Please re-register once.', 'warning', 6000);
+          if (pass.length >= 4) {
+            // Instantly activate password and login
+            const newAcc = {
+              id: 'donor_' + matchingDonor.id,
+              name: matchingDonor.name,
+              username: identifier,
+              email: matchingDonor.email || identifier,
+              phone: matchingDonor.phone,
+              rollNo: matchingDonor.rollNo,
+              password: pass,
+              role: 'donor',
+              donorId: matchingDonor.id,
+              dept: matchingDonor.dept,
+              deptCode: matchingDonor.dept,
+              blood: matchingDonor.blood,
+              year: matchingDonor.year
+            };
+            if (typeof UserStore !== 'undefined') UserStore.add(newAcc);
+            if (typeof CloudSync !== 'undefined' && CloudSync.saveUser) CloudSync.saveUser(newAcc);
+            user = newAcc;
+            Auth.currentUser = newAcc;
+            localStorage.setItem('bloodlink_user', JSON.stringify(newAcc));
+            showToast(`Password activated successfully! Welcome, ${user.name.split(' ')[0]}! 🎉`, 'success');
+            setTimeout(() => {
+              const isFile = window.location.protocol === 'file:';
+              window.location.href = isFile ? 'donor-portal.html' : '/donor-portal.html';
+            }, 800);
+            return;
+          } else {
+            showFieldError('loginPassword', 'Please enter a password with at least 4 characters to activate your account.');
+            return;
+          }
         } else if (userExists) {
           showFieldError('loginPassword', 'Invalid password. Please double check your password.');
           showToast('Invalid password. Please try again.', 'error');
