@@ -70,8 +70,8 @@
     <form class="auth-form" id="loginForm" novalidate>
       <div class="form-group">
         <label class="form-label" for="loginEmail"><span id="loginFieldLabel">Batch Number / Username / Email</span> <span class="required">*</span></label>
-        <input type="text" class="form-input" id="loginEmail" placeholder="e.g. 281232 (Volunteers) or email" autocomplete="username" required>
-        <span id="volunteerHint" style="display:none;font-size:0.78rem;color:var(--red-600);margin-top:4px;">💡 Volunteers: Enter your Batch Number as both Username and Password.</span>
+        <input type="text" class="form-input" id="loginEmail" placeholder="e.g. 281232 or 9445613698" autocomplete="username" required>
+        <span id="volunteerHint" style="display:none;font-size:0.78rem;color:var(--red-600);margin-top:4px;">💡 <strong>Volunteers & Program Officer:</strong> Enter Batch No. or Mobile (9445613698) as both Username & Password.</span>
       </div>
       <div class="form-group">
         <label class="form-label" for="loginPassword">Password <span class="required">*</span></label>
@@ -121,9 +121,9 @@
     const passInput = document.getElementById('loginPassword');
     const hint = document.getElementById('volunteerHint');
     if (role === 'volunteer') {
-      label.textContent = 'Batch Number (Username)';
-      input.placeholder = 'Enter your 6-digit Batch No. (e.g. 281232)';
-      passInput.placeholder = 'Enter your Batch No. as password';
+      label.textContent = 'Batch Number / Mobile (Username)';
+      input.placeholder = 'Enter 6-digit Batch No. or Officer Mobile (9445613698)';
+      passInput.placeholder = 'Enter Batch No. or Mobile as password';
       hint.style.display = 'block';
     } else {
       label.textContent = 'Email, Roll No, or Phone';

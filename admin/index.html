@@ -386,16 +386,17 @@
     // Update user info
     if (user) {
       document.getElementById('sidebarUserName').textContent  = user.name;
-      document.getElementById('sidebarUserRole').textContent  = user.role === 'admin' ? 'Administrator' : 'NSS Volunteer';
+      document.getElementById('sidebarUserRole').textContent  = user.role === 'admin' ? 'NSS Program Officer' : 'NSS Volunteer';
       document.getElementById('sidebarAvatar').textContent    = user.name.charAt(0);
       document.getElementById('topbarAvatar').textContent     = user.name.charAt(0);
       const hr = new Date().getHours();
       const timeGreeting = hr < 12 ? 'Good Morning' : hr < 17 ? 'Good Afternoon' : 'Good Evening';
       const greetingEl = document.getElementById('adminGreetingTitle');
+      const displayName = (user.name.includes('.') && user.name.split(' ').length > 1) ? user.name : user.name.split(' ')[0];
       if (greetingEl) {
-        greetingEl.textContent = `${timeGreeting}, ${user.name.split(' ')[0]} 👋`;
+        greetingEl.textContent = `${timeGreeting}, ${displayName} 👋`;
       }
-      document.getElementById('adminWelcome').textContent     = `Welcome back, ${user.name.split(' ')[0]}! (${user.role === 'admin' ? 'NSS Program Officer' : 'NSS Volunteer' + (user.batchNo ? ' · Batch ' + user.batchNo : '')})`;
+      document.getElementById('adminWelcome').textContent     = `Welcome back, ${displayName}! (${user.role === 'admin' ? 'NSS Program Officer' : 'NSS Volunteer' + (user.batchNo ? ' · Batch ' + user.batchNo : '')})`;
     }
 
     const notifDot = document.getElementById('notifDot');

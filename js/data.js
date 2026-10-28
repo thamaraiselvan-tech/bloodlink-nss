@@ -14,6 +14,7 @@ if (!localStorage.getItem('bloodlink_data_v4')) {
 // ── Official NSS Volunteers List ──────────────────────────────────
 // Batch number acts as both Username & Password for volunteer portal login
 const NSS_VOLUNTEERS = [
+  { id: 0,  name: 'G. SRIRAM (Program Officer)', batchNo: '9445613698', dept: 'NSS Cell / Program Officer',            deptCode: 'OFFICER' },
   { id: 1,  name: 'K MUTHAMIZH CHELVAN',     batchNo: '281232', dept: 'Artificial Intelligence and Machine Learning', deptCode: 'AIML' },
   { id: 2,  name: 'S. SRISHANGARI',          batchNo: '281254', dept: 'Artificial Intelligence and Machine Learning', deptCode: 'AIML' },
   { id: 3,  name: 'RAGHUL N',                batchNo: '288075', dept: 'Artificial Intelligence and Data Science',      deptCode: 'AIDS' },
@@ -77,16 +78,32 @@ const UserStore = {
   getDefaultUsers() {
     return [
       {
+        id: 'officer_sriram',
+        name: 'G. SRIRAM',
+        username: '9445613698',
+        batchNo: '9445613698',
+        phone: '9445613698',
+        email: 'sriram@college.edu',
+        password: '9445613698',
+        role: 'admin',
+        title: 'NSS Program Officer',
+        dept: 'NSS Cell',
+        deptCode: 'OFFICER',
+        donorId: null
+      },
+      {
         id: 'admin',
-        name: 'NSS Program Officer',
+        name: 'G. SRIRAM (Program Officer)',
         username: 'admin',
         batchNo: 'admin',
+        phone: '9445613698',
         email: 'admin@college.edu',
         password: 'admin123',
         role: 'admin',
+        title: 'NSS Program Officer',
         donorId: null
       },
-      ...NSS_VOLUNTEERS.map(v => ({
+      ...NSS_VOLUNTEERS.filter(v => v.id !== 0).map(v => ({
         id: v.id,
         name: v.name,
         username: v.batchNo,
