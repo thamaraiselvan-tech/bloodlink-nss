@@ -654,12 +654,13 @@ tbody tr:last-child td { border-bottom: none; }
 .breadcrumb-sep { opacity: 0.5; }
 
 .mobile-nav-actions { display: none; }
+.drawer-header { display: none; }
 
-/* ================================================================
-   RESPONSIVE
-/* ================================================================
-   RESPONSIVE & MOBILE SIDE-DRAWER
-   ================================================================ */
+@media (min-width: 861px) {
+  .drawer-header { display: none !important; }
+  .mobile-nav-actions { display: none !important; }
+  .nav-backdrop { display: none !important; }
+}
 /* Mobile Drawer Backdrop */
 .nav-backdrop {
   position: fixed;
