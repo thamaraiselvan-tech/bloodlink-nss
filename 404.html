@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Page not found — BloodLink NSS Portal"/>
+  <title>404 — Page Not Found | BloodLink NSS Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .error-page {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 20px 80px;
+      text-align: center;
+      background: radial-gradient(circle at 50% 30%, rgba(254, 205, 211, 0.35) 0%, rgba(253, 251, 247, 0) 70%);
+    }
+    .error-card {
+      max-width: 560px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(225, 205, 185, 0.6);
+      border-radius: var(--radius-xl);
+      padding: 48px 36px;
+      box-shadow: 0 16px 40px rgba(136, 19, 55, 0.08);
+    }
+    .error-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--red-50);
+      color: var(--red-700);
+      border: 1px solid var(--red-100);
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    .error-code {
+      font-family: var(--font-display);
+      font-size: clamp(4.5rem, 12vw, 6.5rem);
+      font-weight: 800;
+      color: var(--red-700);
+      line-height: 1;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    .error-title {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin-bottom: 12px;
+    }
+    .error-desc {
+      color: var(--gray-600);
+      font-size: 0.98rem;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    .error-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-drop">🩸</div>
+        <div class="logo-text">
+          <span class="logo-title">BloodLink</span>
+          <span class="logo-sub">NSS Unit</span>
+        </div>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="about.html" class="nav-link">About NSS</a></li>
+        <li><a href="donors.html" class="nav-link">Donors</a></li>
+        <li><a href="search.html" class="nav-link">Find Blood</a></li>
+        <li><a href="events.html" class="nav-link">Events</a></li>
+        <li><a href="contact.html" class="nav-link">Contact</a></li>
+        <li class="mobile-nav-actions">
+          <a href="login.html" class="btn btn-outline btn-block">Login</a>
+          <a href="register.html" class="btn btn-primary btn-block">Donate Blood</a>
+        </li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-outline" id="loginBtn">Login</a>
+        <a href="register.html" class="btn btn-primary" id="registerBtn">Donate Blood</a>
+      </div>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <main class="error-page">
+    <div class="error-card">
+      <div class="error-badge"><span>🩸</span> 404 Error</div>
+      <div class="error-code">404</div>
+      <h1 class="error-title">Page Not Found</h1>
+      <p class="error-desc">
+        The link you followed might be broken, or the page may have been moved. 
+        Don't worry — you can head back to the homepage or search for active blood donors anytime.
+      </p>
+      <div class="error-actions">
+        <a href="index.html" class="btn btn-primary btn-lg">← Back to Home</a>
+        <a href="search.html" class="btn btn-outline btn-lg">Find Blood Donors 🔍</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top:1px solid #222;padding-top:24px;">
+        <p>© 2026 BloodLink NSS Portal — Dedicated to Saving Lives</p>
+        <p><a href="index.html" style="color:var(--red-400);">Return to Home</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
