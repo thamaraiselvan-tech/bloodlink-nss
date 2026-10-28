@@ -69,14 +69,13 @@
 
     <form class="auth-form" id="loginForm" novalidate>
       <div class="form-group">
-        <label class="form-label" for="loginEmail"><span id="loginFieldLabel">Batch Number / Username / Email</span> <span class="required">*</span></label>
-        <input type="text" class="form-input" id="loginEmail" placeholder="e.g. 281232 or 9445613698" autocomplete="username" required>
-        <span id="volunteerHint" style="display:none;font-size:0.78rem;color:var(--red-600);margin-top:4px;"></span>
+        <label class="form-label" for="loginEmail"><span id="loginFieldLabel">Batch No. or Email</span> <span class="required">*</span></label>
+        <input type="text" class="form-input" id="loginEmail" placeholder="Batch No. or Email" autocomplete="username" required>
       </div>
       <div class="form-group">
         <label class="form-label" for="loginPassword">Password <span class="required">*</span></label>
         <div class="input-wrapper">
-          <input type="password" class="form-input" id="loginPassword" placeholder="Enter password (or Batch Number)" autocomplete="current-password" required>
+          <input type="password" class="form-input" id="loginPassword" placeholder="Password" autocomplete="current-password" required>
           <button type="button" class="password-toggle" tabindex="-1" aria-label="Show password">👁️</button>
         </div>
       </div>
@@ -119,17 +118,14 @@
     const label = document.getElementById('loginFieldLabel');
     const input = document.getElementById('loginEmail');
     const passInput = document.getElementById('loginPassword');
-    const hint = document.getElementById('volunteerHint');
     if (role === 'volunteer') {
-      label.textContent = 'Batch Number / Mobile (Username)';
-      input.placeholder = 'Enter 6-digit Batch No. or Officer Mobile (9445613698)';
-      passInput.placeholder = 'Enter Batch No. or Mobile as password';
-      hint.style.display = 'block';
+      label.textContent = 'Username';
+      input.placeholder = 'Username';
+      passInput.placeholder = 'Password';
     } else {
-      label.textContent = 'Email, Roll No, or Phone';
-      input.placeholder = 'e.g. your@college.edu or Roll No / Phone';
-      passInput.placeholder = 'Enter your password';
-      hint.style.display = 'none';
+      label.textContent = 'Batch No. or Email';
+      input.placeholder = 'Batch No. or Email';
+      passInput.placeholder = 'Password';
     }
   }
 
@@ -161,7 +157,7 @@
     const role       = document.querySelector('input[name="role"]:checked').value;
 
     if (!identifier) {
-      showFieldError('loginEmail', role === 'volunteer' ? 'Please enter your Batch Number.' : 'Please enter your Email, Roll Number, or Phone.');
+      showFieldError('loginEmail', role === 'volunteer' ? 'Please enter your username.' : 'Please enter your Batch No. or Email.');
       return;
     }
     if (identifier.includes('@') && !validateEmail(identifier)) {
@@ -231,7 +227,7 @@
           showFieldError('loginPassword', 'Invalid password. Please double check your password.');
           showToast('Invalid password. Please try again.', 'error');
         } else {
-          showFieldError('loginPassword', role === 'volunteer' ? 'Invalid credentials. Please check your batch number or password.' : 'Invalid credentials. No donor account found for this email, roll number, or phone.');
+          showFieldError('loginPassword', role === 'volunteer' ? 'Invalid username or password.' : 'Invalid credentials. Please check your Batch No., Email, or password.');
           showToast('Login failed. Check your credentials.', 'error');
         }
         return;
