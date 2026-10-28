@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Register as a blood donor with the NSS Unit. Fill in your details to join the BloodLink donor community."/>
+  <title>Register as Donor — BloodLink NSS Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <style>
+    .blood-group-selector { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+    .bg-option input { display: none; }
+    .bg-option label {
+      display: flex; align-items: center; justify-content: center;
+      height: 52px; border: 2px solid var(--gray-200);
+      border-radius: var(--radius); cursor: pointer;
+      font-family: var(--font-display); font-size: 1.1rem; font-weight: 800;
+      color: var(--gray-600); transition: var(--transition);
+    }
+    .bg-option label:hover { border-color: var(--red-400); color: var(--red-600); background: var(--red-50); }
+    .bg-option input:checked + label { border-color: var(--red-600); background: var(--red-600); color: white; }
+    .upload-area {
+      border: 2px dashed var(--gray-200); border-radius: var(--radius);
+      padding: 28px; text-align: center; cursor: pointer;
+      transition: var(--transition); background: var(--gray-50);
+    }
+    .upload-area:hover { border-color: var(--red-400); background: var(--red-50); }
+    .upload-icon { font-size: 2rem; margin-bottom: 8px; }
+    .upload-text { font-size: 0.85rem; color: var(--gray-500); }
+    .upload-text strong { color: var(--red-600); }
+  </style>
+</head>
+<body>
+
+<div class="auth-page">
+  <!-- LEFT PANEL -->
+  <div class="auth-panel-left">
+    <div class="auth-left-content">
+      <div class="nav-logo">
+        <div class="logo-drop">🩸</div>
+        <div class="logo-text">
+          <span class="logo-title">BloodLink</span>
+          <span class="logo-sub">NSS Unit</span>
+        </div>
+      </div>
+      <h2 class="auth-left-title">Join the <br>Blood Donor<br>Community</h2>
+      <p class="auth-left-desc">Your single registration can save up to 3 lives. Join students and volunteers who are making a difference at our college.</p>
+      <div class="auth-features">
+        <div class="auth-feature"><div class="auth-feature-icon">✅</div><div class="auth-feature-text">100% free and voluntary</div></div>
+        <div class="auth-feature"><div class="auth-feature-icon">🔒</div><div class="auth-feature-text">Your data is private — only shared with NSS team</div></div>
+        <div class="auth-feature"><div class="auth-feature-icon">⏱️</div><div class="auth-feature-text">Takes only 2 minutes to register</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="auth-panel-right" style="max-height:100vh;overflow-y:auto;">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-drop">🩸</div>
+      <div class="logo-text">
+        <span class="logo-title">BloodLink</span>
+        <span class="logo-sub">NSS Unit</span>
+      </div>
+    </a>
+
+    <h1 class="auth-title">Donor Registration</h1>
+    <p class="auth-subtitle">Already registered? <a href="login.html">Sign in here</a></p>
+
+    <!-- Step progress -->
+    <div class="register-steps" id="registerSteps">
+      <div class="reg-step active" id="step-ind-1">
+        <div class="reg-step-circle" id="step-circle-1">1</div>
+        <div class="reg-step-label">Personal</div>
+      </div>
+      <div class="reg-step-line" id="line-1"></div>
+      <div class="reg-step" id="step-ind-2">
+        <div class="reg-step-circle" id="step-circle-2">2</div>
+        <div class="reg-step-label">Medical</div>
+      </div>
+      <div class="reg-step-line" id="line-2"></div>
+      <div class="reg-step" id="step-ind-3">
+        <div class="reg-step-circle" id="step-circle-3">3</div>
+        <div class="reg-step-label">Account</div>
+      </div>
+    </div>
+
+    <form id="registerForm" novalidate>
+
+      <!-- STEP 1: Personal Info -->
+      <div class="step-panel active" id="panel-1">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="firstName">First Name <span class="required">*</span></label>
+            <input type="text" class="form-input" id="firstName" placeholder="Ravi" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="lastName">Last Name <span class="required">*</span></label>
+            <input type="text" class="form-input" id="lastName" placeholder="Kumar" required>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="rollNo">Batch Number <span class="required">*</span></label>
+            <input type="text" class="form-input" id="rollNo" placeholder="288xxx" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="year">Year of Study <span class="required">*</span></label>
+            <select class="form-select" id="year" required>
+              <option value="">Select year</option>
+              <option>1st Year</option>
+              <option>2nd Year</option>
+              <option>3rd Year</option>
+              <option>4th Year</option>
+              <option>PG / Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="department">Department <span class="required">*</span></label>
+          <select class="form-select" id="department" required>
+            <option value="">Select department</option>
+            <option>Artificial Intelligence and Data Science (AIDS)</option>
+            <option>Artificial Intelligence and Machine Learning (AIML)</option>
+            <option>Computer Science & Engineering (CSE)</option>
+            <option>Electronics & Communication (ECE)</option>
+            <option>Electrical Engineering (EEE)</option>
+            <option>Mechanical Engineering (MECH)</option>
+            <option>Civil Engineering (CIVIL)</option>
+            <option>Information Technology (IT)</option>
+            <option>Business Administration (MBA)</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone Number <span class="required">*</span></label>
+          <input type="tel" class="form-input" id="phone" placeholder="1234567890" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="dob">Date of Birth <span class="required">*</span></label>
+          <input type="date" class="form-input" id="dob" required>
+        </div>
+        <button type="button" class="btn btn-primary btn-block btn-lg" onclick="goToStep(2)">Continue →</button>
+      </div>
+
+      <!-- STEP 2: Medical Info -->
+      <div class="step-panel" id="panel-2">
+        <div class="form-group">
+          <label class="form-label">Blood Group <span class="required">*</span></label>
+          <div class="blood-group-selector" id="bloodGroupSelector">
+            <div class="bg-option"><input type="radio" name="bloodGroup" id="bg-Apos" value="A+"><label for="bg-Apos">A+</label></div>
+            <div class="bg-option"><input type="radio" name="bloodGroup" id="bg-Aneg" value="A-"><label for="bg-Aneg">A-</label></div>
+            <div class="bg-option"><input type="radio" name="bloodGroup" id="bg-Bpos" value="B+"><label for="bg-Bpos">B+</label></div>
+            <div class="bg-option"><input type="radio" name="bloodGroup" id="bg-Bneg" value="B-"><label for="bg-Bneg">B-</label></div>
+            <div class="bg-option"><input type="radio" name="bloodGroup" id="bg-Opos" value="O+"><label for="bg-Opos">O+</label></div>
+            <div class="bg-option"><input type="radio" name="bloodGroup" id="bg-Oneg" value="O-"><label for="bg-Oneg">O-</label></div>
+            <div class="bg-option"><input type="radio" name="bloodGroup" id="bg-ABpos" value="AB+"><label for="bg-ABpos">AB+</label></div>
+            <div class="bg-option"><input type="radio" name="bloodGroup" id="bg-ABneg" value="AB-"><label for="bg-ABneg">AB-</label></div>
+            <div class="bg-option"><input type="radio" name="bloodGroup" id="bg-A1pos" value="A1+"><label for="bg-A1pos">A1+</label></div>
+            <div class="bg-option"><input type="radio" name="bloodGroup" id="bg-A1neg" value="A1-"><label for="bg-A1neg">A1-</label></div>
+            <div class="bg-option"><input type="radio" name="bloodGroup" id="bg-A1Bpos" value="A1B+"><label for="bg-A1Bpos">A1B+</label></div>
+            <div class="bg-option"><input type="radio" name="bloodGroup" id="bg-A1Bneg" value="A1B-"><label for="bg-A1Bneg">A1B-</label></div>
+          </div>
+          <div class="form-hint">Select your blood group.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="weight">Weight (kg) <span class="required">*</span></label>
+          <input type="number" class="form-input" id="weight" placeholder="e.g. 65" min="45" max="200">
+          <div class="form-hint">Must be at least 45 kg to donate blood.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="lastDonated">Last Donation Date</label>
+          <input type="date" class="form-input" id="lastDonated">
+          <div class="form-hint">Leave empty if you've never donated before.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Medical Conditions</label>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <label class="checkbox-group"><input type="checkbox" id="medNone" checked onchange="toggleMedical(this)"><span>None — I am in good health</span></label>
+            <label class="checkbox-group"><input type="checkbox" id="medDiabetes"><span>Diabetes</span></label>
+            <label class="checkbox-group"><input type="checkbox" id="medHypertension"><span>Hypertension</span></label>
+            <label class="checkbox-group"><input type="checkbox" id="medAsthma"><span>Asthma</span></label>
+            <label class="checkbox-group"><input type="checkbox" id="medOther"><span>Other (please mention)</span></label>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="button" class="btn btn-outline btn-lg" style="flex:1" onclick="goToStep(1)">← Back</button>
+          <button type="button" class="btn btn-primary btn-lg" style="flex:2" onclick="goToStep(3)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Account Setup -->
+      <div class="step-panel" id="panel-3">
+        <div class="form-group">
+          <label class="form-label" for="regEmail">College Email <span class="required">*</span></label>
+          <input type="email" class="form-input" id="regEmail" placeholder="rollno@saranathan.ac.in" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="regPassword">Password <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="password" class="form-input" id="regPassword" placeholder="Min 6 characters" required>
+            <button type="button" class="password-toggle" tabindex="-1">👁️</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="regConfirm">Confirm Password <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="password" class="form-input" id="regConfirm" placeholder="Repeat password" required>
+            <button type="button" class="password-toggle" tabindex="-1">👁️</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Availability to Donate</label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <label class="checkbox-group"><input type="checkbox" id="avlWeekdays" checked><span>Weekdays</span></label>
+            <label class="checkbox-group"><input type="checkbox" id="avlWeekends" checked><span>Weekends</span></label>
+            <label class="checkbox-group"><input type="checkbox" id="avlEmergency" checked><span>Emergency calls</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-group">
+            <input type="checkbox" id="termsCheck" required>
+            <span>I agree to the <a href="#" style="color:var(--red-600);font-weight:600;">Terms of Service</a> and confirm that the information I've provided is accurate. I understand that my data will be shared with the NSS unit.</span>
+          </label>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="button" class="btn btn-outline btn-lg" style="flex:1" onclick="goToStep(2)">← Back</button>
+          <button type="submit" class="btn btn-primary btn-lg" style="flex:2" id="regSubmitBtn">Register Now 🩸</button>
+        </div>
+      </div>
+
+    </form>
+
+    <p class="auth-footer" style="margin-top:24px;">
+      <a href="index.html">← Back to Home</a>
+    </p>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+
+<!-- Success Modal -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal" style="text-align:center;">
+    <div style="font-size:4rem;margin-bottom:16px;">🎉</div>
+    <h2 class="modal-title" style="margin-bottom:12px;">Registration Successful!</h2>
+    <p style="color:var(--gray-500);font-size:0.95rem;margin-bottom:28px;">Welcome to the BloodLink NSS Donor community! Your profile has been created. The NSS team will contact you for upcoming donation camps.</p>
+    <div style="background:var(--gray-50);border-radius:var(--radius);padding:16px;margin-bottom:24px;text-align:left;">
+      <p id="successSummary" style="font-size:0.88rem;color:var(--gray-600);line-height:1.7;"></p>
+    </div>
+    <a href="login.html" class="btn btn-primary btn-block btn-lg">Go to Login →</a>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+  let currentStep = 1;
+
+  function goToStep(step) {
+    // Validate current step before moving forward
+    if (step > currentStep) {
+      if (!validateStep(currentStep)) return;
+    }
+
+    // Update UI
+    document.getElementById(`panel-${currentStep}`).classList.remove('active');
+    document.getElementById(`panel-${step}`).classList.add('active');
+
+    // Update step indicators
+    for (let i = 1; i <= 3; i++) {
+      const ind = document.getElementById(`step-ind-${i}`);
+      const circle = document.getElementById(`step-circle-${i}`);
+      ind.classList.remove('active','done');
+      if (i < step)       { ind.classList.add('done');   circle.textContent = '✓'; }
+      else if (i === step) { ind.classList.add('active'); circle.textContent = i; }
+      else                 { circle.textContent = i; }
+      if (i < 3) {
+        const line = document.getElementById(`line-${i}`);
+        line.classList.toggle('done', i < step);
+      }
+    }
+    currentStep = step;
+    window.scrollTo(0,0);
+  }
+
+  function validateStep(step) {
+    if (step === 1) {
+      const fields = [
+        { id: 'firstName',  msg: 'Enter your first name' },
+        { id: 'lastName',   msg: 'Enter your last name' },
+        { id: 'rollNo',     msg: 'Enter your roll number' },
+        { id: 'year',       msg: 'Select your year' },
+        { id: 'department', msg: 'Select your department' },
+        { id: 'phone',      msg: 'Enter your phone number' },
+        { id: 'dob',        msg: 'Enter your date of birth' },
+      ];
+      let valid = true;
+      fields.forEach(f => {
+        const val = document.getElementById(f.id).value.trim();
+        if (!val) { showFieldError(f.id, f.msg); valid = false; }
+        else clearFieldError(f.id);
+      });
+      const phone = document.getElementById('phone').value;
+      if (phone && !validatePhone(phone)) { showFieldError('phone','Enter a valid 10-digit phone number'); valid = false; }
+      return valid;
+    }
+    if (step === 2) {
+      const bg = document.querySelector('input[name="bloodGroup"]:checked');
+      if (!bg) { showToast('Please select your blood group.', 'error'); return false; }
+      const weight = document.getElementById('weight').value;
+      if (weight && parseInt(weight) < 45) { showFieldError('weight','Minimum weight to donate is 45 kg'); return false; }
+      return true;
+    }
+    return true;
+  }
+
+  function toggleMedical(cb) {
+    if (cb.checked) {
+      ['medDiabetes','medHypertension','medAsthma','medOther'].forEach(id => document.getElementById(id).checked = false);
+    }
+  }
+
+  document.getElementById('registerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Step 3 validations
+    const email = document.getElementById('regEmail').value.trim();
+    const pass  = document.getElementById('regPassword').value;
+    const conf  = document.getElementById('regConfirm').value;
+    const terms = document.getElementById('termsCheck').checked;
+
+    if (!email || !validateEmail(email)) { showFieldError('regEmail','Enter a valid email address'); return; }
+    if (pass.length < 6) { showFieldError('regPassword','Password must be at least 6 characters'); return; }
+    if (pass !== conf)   { showFieldError('regConfirm', 'Passwords do not match'); return; }
+    if (!terms)          { showToast('Please agree to the Terms of Service.', 'error'); return; }
+
+    const btn = document.getElementById('regSubmitBtn');
+    btn.textContent = 'Registering…';
+    btn.disabled = true;
+
+    const donor = {
+      name:        `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`,
+      rollNo:      document.getElementById('rollNo').value.toUpperCase(),
+      dept:        document.getElementById('department').value.match(/\((\w+)\)/)?.[1] || document.getElementById('department').value,
+      year:        document.getElementById('year').value,
+      blood:       document.querySelector('input[name="bloodGroup"]:checked')?.value || 'Unknown',
+      phone:       document.getElementById('phone').value,
+      lastDonated: document.getElementById('lastDonated').value || null,
+      donations:   0,
+      available:   true,
+      city:        'Chennai',
+    };
+
+    setTimeout(() => {
+      DonorStore.add(donor);
+      document.getElementById('successSummary').innerHTML =
+        `<strong>Name:</strong> ${donor.name}<br>
+         <strong>Roll No:</strong> ${donor.rollNo}<br>
+         <strong>Department:</strong> ${donor.dept}<br>
+         <strong>Blood Group:</strong> ${donor.blood}<br>
+         <strong>Email:</strong> ${email}`;
+      openModal('successModal');
+    }, 1000);
+  });
+</script>
+</body>
+</html>

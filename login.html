@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Login to the NSS BloodLink Portal — donors and NSS volunteers can access their dashboards here."/>
+  <title>Login — BloodLink NSS Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+<div class="auth-page">
+  <!-- LEFT PANEL -->
+  <div class="auth-panel-left">
+    <div class="auth-left-content">
+      <div class="nav-logo">
+        <div class="logo-drop">🩸</div>
+        <div class="logo-text">
+          <span class="logo-title">BloodLink</span>
+          <span class="logo-sub">NSS Unit</span>
+        </div>
+      </div>
+      <h2 class="auth-left-title">Welcome Back,<br>Blood Hero!</h2>
+      <p class="auth-left-desc">Login to manage your donor profile, check upcoming camps, or manage donors as an NSS volunteer.</p>
+      <div class="auth-features">
+        <div class="auth-feature">
+          <div class="auth-feature-icon">🩸</div>
+          <div class="auth-feature-text">Track your donation history and eligibility</div>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon">🔔</div>
+          <div class="auth-feature-text">Get notified when your blood group is needed</div>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon">🛡️</div>
+          <div class="auth-feature-text">NSS Volunteers can manage donors & events</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="auth-panel-right">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-drop">🩸</div>
+      <div class="logo-text">
+        <span class="logo-title">BloodLink</span>
+        <span class="logo-sub">NSS Unit</span>
+      </div>
+    </a>
+
+    <h1 class="auth-title">Sign In</h1>
+    <p class="auth-subtitle">Don't have an account? <a href="register.html">Register as a donor</a></p>
+
+    <!-- Role selector -->
+    <div class="role-selector" id="roleSelector">
+      <div class="role-option">
+        <input type="radio" name="role" id="roleDonor" value="donor" checked>
+        <label for="roleDonor"><span class="role-icon">🩸</span> Donor</label>
+      </div>
+      <div class="role-option">
+        <input type="radio" name="role" id="roleVolunteer" value="volunteer">
+        <label for="roleVolunteer"><span class="role-icon">🎽</span> NSS Volunteer</label>
+      </div>
+    </div>
+
+    <form class="auth-form" id="loginForm" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="loginEmail"><span id="loginFieldLabel">Batch Number / Username / Email</span> <span class="required">*</span></label>
+        <input type="text" class="form-input" id="loginEmail" placeholder="e.g. 281232 (Volunteers) or email" autocomplete="username" required>
+        <span id="volunteerHint" style="display:none;font-size:0.78rem;color:var(--red-600);margin-top:4px;">💡 Volunteers: Enter your Batch Number as both Username and Password.</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="loginPassword">Password <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <input type="password" class="form-input" id="loginPassword" placeholder="Enter password (or Batch Number)" autocomplete="current-password" required>
+          <button type="button" class="password-toggle" tabindex="-1" aria-label="Show password">👁️</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="checkbox-group">
+          <input type="checkbox" id="rememberMe">
+          <span>Remember me</span>
+        </label>
+        <a href="#" onclick="showToast('To reset your credentials, please contact your NSS Program Officer.', 'info'); return false;" class="forgot-link">Forgot password?</a>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg" id="loginSubmitBtn">
+        Sign In
+      </button>
+    </form>
+
+
+
+    <p class="auth-footer">
+      New here? <a href="register.html">Create your donor account →</a>
+    </p>
+    <p class="auth-footer" style="margin-top:8px;">
+      <a href="index.html">← Back to Home</a>
+    </p>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container"></div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+
+
+  function updateFormPlaceholders(role) {
+    const label = document.getElementById('loginFieldLabel');
+    const input = document.getElementById('loginEmail');
+    const passInput = document.getElementById('loginPassword');
+    const hint = document.getElementById('volunteerHint');
+    if (role === 'volunteer') {
+      label.textContent = 'Batch Number (Username)';
+      input.placeholder = 'Enter your 6-digit Batch No. (e.g. 281232)';
+      passInput.placeholder = 'Enter your Batch No. as password';
+      hint.style.display = 'block';
+    } else {
+      label.textContent = 'Email Address or Phone';
+      input.placeholder = 'your@college.edu or phone number';
+      passInput.placeholder = 'Enter your password';
+      hint.style.display = 'none';
+    }
+  }
+
+  document.querySelectorAll('input[name="role"]').forEach(radio => {
+    radio.addEventListener('change', (e) => updateFormPlaceholders(e.target.value));
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const identifier = document.getElementById('loginEmail').value.trim();
+    const pass       = document.getElementById('loginPassword').value;
+    const role       = document.querySelector('input[name="role"]:checked').value;
+
+    if (!identifier) {
+      showFieldError('loginEmail', role === 'volunteer' ? 'Please enter your Batch Number.' : 'Please enter your Email or Username.');
+      return;
+    }
+    if (identifier.includes('@') && !validateEmail(identifier)) {
+      showFieldError('loginEmail', 'Please enter a valid email address.');
+      return;
+    }
+    if (!pass) {
+      showFieldError('loginPassword', 'Please enter your password.');
+      return;
+    }
+
+    clearFieldError('loginEmail');
+    clearFieldError('loginPassword');
+
+    const btn = document.getElementById('loginSubmitBtn');
+    btn.textContent = 'Signing in…';
+    btn.disabled = true;
+
+    setTimeout(() => {
+      const user = Auth.login(identifier, pass);
+      if (!user) {
+        btn.textContent = 'Sign In';
+        btn.disabled = false;
+        showFieldError('loginPassword', 'Invalid credentials. Please check your batch number or password.');
+        showToast('Login failed. Check your credentials.', 'error');
+        return;
+      }
+      showToast(`Welcome back, ${user.name.split(' ')[0]}! 🎉`, 'success');
+      setTimeout(() => {
+        if (user.role === 'admin' || user.role === 'volunteer') window.location.href = 'admin/index.html';
+        else window.location.href = 'donor-portal.html';
+      }, 800);
+    }, 500);
+  });
+
+  // Clear errors on input
+  ['loginEmail','loginPassword'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', () => clearFieldError(id));
+  });
+</script>
+</body>
+</html>

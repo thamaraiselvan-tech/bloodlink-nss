@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Admin Dashboard for NSS BloodLink Portal. Manage donors, events, blood availability, and view analytics."/>
+  <title>Admin Dashboard — BloodLink NSS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <style>
+    .quick-actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 28px; }
+    .quick-action-btn {
+      background: white; border: 1px solid var(--gray-100); border-radius: var(--radius-xl);
+      padding: 20px 16px; text-align: center; cursor: pointer; transition: var(--transition);
+      display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none;
+    }
+    .quick-action-btn:hover { border-color: var(--red-300); box-shadow: var(--shadow-red); transform: translateY(-3px); }
+    .qa-icon { font-size: 1.8rem; }
+    .qa-label { font-size: 0.82rem; font-weight: 600; color: var(--gray-600); }
+    .donors-table-section { background: white; border: 1px solid var(--gray-100); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); overflow: hidden; }
+    .dt-header { padding: 20px 24px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; }
+    .dt-title { font-size: 1rem; font-weight: 700; color: var(--gray-900); }
+    .dt-controls { display: flex; gap: 10px; }
+    .admin-search {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--gray-100); border-radius: var(--radius-full);
+      padding: 8px 14px;
+    }
+    .admin-search input { background: none; border: none; outline: none; font-size: 0.85rem; font-family: var(--font-sans); width: 180px; }
+    .action-group { display: flex; gap: 6px; }
+    .action-btn {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; cursor: pointer; transition: var(--transition);
+      border: none; background: var(--gray-100);
+    }
+    .action-btn:hover { background: var(--red-100); }
+    .action-btn.danger:hover { background: var(--red-100); color: var(--red-600); }
+    @media(max-width:900px){ .quick-actions{grid-template-columns:1fr 1fr;} }
+  </style>
+</head>
+<body>
+
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-drop" style="font-size:1.6rem;">🩸</div>
+      <div class="logo-text">
+        <span class="logo-title" style="color:var(--red-400);font-size:1rem;font-weight:800;">BloodLink</span>
+        <span class="logo-sub" style="color:var(--gray-500);font-size:0.65rem;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;">NSS Admin</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Overview</div>
+      <a class="sidebar-link active" href="index.html">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <div class="sidebar-section-label">Donors</div>
+      <a class="sidebar-link" href="../donors.html">
+        <span class="icon">🩸</span> All Donors
+        <span class="badge-count" id="sidebarDonorCount">0</span>
+      </a>
+      <a class="sidebar-link" href="../register.html" target="_blank">
+        <span class="icon">➕</span> Add New Donor
+      </a>
+      <div class="sidebar-section-label">Team</div>
+      <a class="sidebar-link" href="#volunteersSection">
+        <span class="icon">🎽</span> NSS Volunteers
+        <span class="badge-count" id="sidebarVolunteerCount">56</span>
+      </a>
+      <div class="sidebar-section-label">Events</div>
+      <a class="sidebar-link" href="../events.html">
+        <span class="icon">📅</span> Manage Events
+      </a>
+      <a class="sidebar-link" href="../events.html">
+        <span class="icon">🗓️</span> Schedule Camp
+      </a>
+      <div class="sidebar-section-label">Reports</div>
+      <a class="sidebar-link" href="#statsGrid">
+        <span class="icon">📈</span> Analytics
+      </a>
+      <a class="sidebar-link" href="#donorsTableSection">
+        <span class="icon">📋</span> Donor Records
+      </a>
+      <div class="sidebar-section-label">System</div>
+      <a class="sidebar-link" href="../index.html">
+        <span class="icon">🏠</span> View Portal
+      </a>
+      <a class="sidebar-link" href="javascript:void(0)" onclick="Auth.logout()">
+        <span class="icon">🚪</span> Logout
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" id="sidebarUser" onclick="Auth.logout()" title="Click to Logout">
+        <div class="user-avatar-sm" id="sidebarAvatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">Admin</div>
+          <div class="user-role" id="sidebarUserRole">Administrator</div>
+        </div>
+        <span class="user-chevron" title="Logout">🚪</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="dashboard-main">
+
+    <!-- TOP BAR -->
+    <div class="dashboard-topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-right">
+        <div class="topbar-search">
+          <span class="topbar-search-icon">🔍</span>
+          <input type="text" placeholder="Quick search donors…" id="quickSearch">
+        </div>
+        <div class="notification-btn" onclick="handleNotificationClick()" title="Alerts">
+          🔔<div class="notification-dot" id="notifDot" style="display:none;"></div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="Auth.logout()" style="padding:6px 14px;font-size:0.82rem;gap:6px;" title="Sign out of account">
+          🚪 Logout
+        </button>
+        <div class="user-avatar-sm" style="cursor:pointer;" id="topbarAvatar" onclick="Auth.logout()" title="Click to Logout">A</div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD CONTENT -->
+    <div class="dashboard-content">
+
+      <div class="page-title">Good Evening 👋</div>
+      <p class="page-subtitle" id="adminWelcome">Welcome back, Admin! Here's what's happening with the NSS Blood Donation Portal today.</p>
+
+      <!-- QUICK ACTIONS -->
+      <div class="quick-actions">
+        <a href="../register.html" target="_blank" class="quick-action-btn">
+          <div class="qa-icon">➕</div>
+          <div class="qa-label">Add Donor</div>
+        </a>
+        <a href="../events.html" class="quick-action-btn">
+          <div class="qa-icon">📅</div>
+          <div class="qa-label">New Event</div>
+        </a>
+        <a href="../search.html" class="quick-action-btn">
+          <div class="qa-icon">🔍</div>
+          <div class="qa-label">Find Blood</div>
+        </a>
+        <a href="#" class="quick-action-btn" onclick="exportCSV()">
+          <div class="qa-icon">📤</div>
+          <div class="qa-label">Export Data</div>
+        </a>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-card-icon red">🩸</div>
+          <div class="stat-card-body">
+            <div class="stat-card-val" id="statTotalDonors">—</div>
+            <div class="stat-card-label">Total Donors</div>
+            <div class="stat-card-change up" id="statDonorChange">↑ 3 this week</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon green">✅</div>
+          <div class="stat-card-body">
+            <div class="stat-card-val" id="statAvailable">—</div>
+            <div class="stat-card-label">Available to Donate</div>
+            <div class="stat-card-change up">Ready now</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon blue">📅</div>
+          <div class="stat-card-body">
+            <div class="stat-card-val" id="statUpcomingEvents">0</div>
+            <div class="stat-card-label">Upcoming Events</div>
+            <div class="stat-card-change up" id="statUpcomingChange">No camps scheduled</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon purple">🚨</div>
+          <div class="stat-card-body">
+            <div class="stat-card-val" id="statUrgentRequests">0</div>
+            <div class="stat-card-label">Urgent Requests</div>
+            <div class="stat-card-change down" id="statUrgentChange">None active</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN GRID -->
+      <div class="dashboard-grid">
+
+        <!-- Recent Donors Table -->
+        <div class="donors-table-section" id="donorsTableSection">
+          <div class="dt-header">
+            <div class="dt-title">Recent Donors</div>
+            <div class="dt-controls">
+              <div class="admin-search">
+                <span>🔍</span>
+                <input type="text" placeholder="Search…" id="tableSearch" oninput="filterTable()">
+              </div>
+              <select class="form-select" id="tableBloodFilter" onchange="filterTable()" style="padding:8px 12px;font-size:0.85rem;height:36px;border-radius:var(--radius-full);">
+                <option value="">All Groups</option>
+                <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+                <option>A1+</option><option>A1-</option>
+                <option>A1B+</option><option>A1B-</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table id="donorsTable">
+              <thead>
+                <tr>
+                  <th>Donor</th>
+                  <th>Blood</th>
+                  <th>Dept</th>
+                  <th>Donations</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="donorsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Blood Availability Widget -->
+        <div class="widget">
+          <div class="widget-header">
+            <div class="widget-title">Blood Availability</div>
+            <div class="widget-action" onclick="loadDashboard()">Refresh</div>
+          </div>
+          <div class="widget-body">
+            <div class="blood-availability-grid" id="bloodAvailGrid"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM GRID -->
+      <div class="dashboard-grid">
+        <!-- Recent Activity -->
+        <div class="widget">
+          <div class="widget-header">
+            <div class="widget-title">Recent Activity</div>
+          </div>
+          <div class="widget-body">
+            <div class="activity-list" id="activityList">
+              <div class="activity-empty-state" style="text-align:center;padding:36px 16px;color:var(--gray-400);width:100%;">
+                <div style="font-size:2rem;margin-bottom:8px;">📋</div>
+                <strong style="color:var(--gray-700);display:block;margin-bottom:4px;font-size:0.95rem;">No Activity Recorded Yet</strong>
+                <span style="font-size:0.82rem;color:var(--gray-500);">Activity logs will appear automatically as donors register, donations are marked, and camps are organized.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Events Widget -->
+        <div class="widget">
+          <div class="widget-header">
+            <div class="widget-title">Upcoming Events</div>
+            <a href="../events.html" class="widget-action">View All</a>
+          </div>
+          <div class="widget-body">
+            <div id="upcomingEventsWidget"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NSS VOLUNTEERS ROSTER -->
+      <div class="donors-table-section" id="volunteersSection" style="margin-top:28px;">
+        <div class="dt-header" style="flex-wrap:wrap;gap:16px;">
+          <div>
+            <div class="dt-title">🎽 NSS Volunteer Team Directory (<span id="volunteerCountHeader">56</span>)</div>
+            <div style="font-size:0.8rem;color:var(--gray-400);margin-top:3px;">All 56 volunteers can sign in using their 6-digit batch number as username & password</div>
+          </div>
+          <div class="dt-controls">
+            <div class="admin-search">
+              <span>🔍</span>
+              <input type="text" id="volunteerSearchInput" placeholder="Filter by name, dept, or batch no…" style="width:250px;" oninput="filterVolunteersTable()">
+            </div>
+          </div>
+        </div>
+        <div class="table-wrapper" style="max-height:480px;overflow-y:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:50px;">#</th>
+                <th>Volunteer Name</th>
+                <th>Batch Number (Login & Pass)</th>
+                <th>Department</th>
+                <th>Access Role</th>
+              </tr>
+            </thead>
+            <tbody id="volunteersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /dashboard-content -->
+  </main>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal" style="max-width:400px;">
+    <div style="text-align:center;padding:20px 0;">
+      <div style="font-size:3rem;margin-bottom:16px;">⚠️</div>
+      <h3 class="modal-title" style="margin-bottom:12px;">Delete Donor?</h3>
+      <p style="color:var(--gray-500);font-size:0.9rem;margin-bottom:28px;">This action cannot be undone. The donor's record will be permanently removed from the database.</p>
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-outline btn-block" onclick="closeModal('deleteModal')">Cancel</button>
+        <button class="btn btn-danger btn-block" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+
+<script src="../js/data.js"></script>
+<script src="../js/app.js"></script>
+<script>
+  // Auth guard
+  const user = Auth.loadSession();
+  if (!user || !Auth.isVolunteer()) {
+    window.location.href = '../login.html';
+  }
+
+  function loadDashboard() {
+    const donors    = DonorStore.getAll();
+    const events    = EventStore.getUpcoming();
+    const available = donors.filter(d => d.available).length;
+    const volunteers = DB.volunteers || [];
+
+    // Update stats
+    const urgentCount = UrgentRequestStore.getAll().length;
+    document.getElementById('statTotalDonors').textContent    = donors.length;
+    document.getElementById('statAvailable').textContent      = available;
+    document.getElementById('statUpcomingEvents').textContent = events.length;
+    document.getElementById('statUrgentRequests').textContent = urgentCount;
+    document.getElementById('sidebarDonorCount').textContent  = donors.length;
+    if (document.getElementById('sidebarVolunteerCount')) {
+      document.getElementById('sidebarVolunteerCount').textContent = volunteers.length;
+    }
+    if (document.getElementById('volunteerCountHeader')) {
+      document.getElementById('volunteerCountHeader').textContent = volunteers.length;
+    }
+    const donorChangeEl = document.getElementById('statDonorChange');
+    if (donorChangeEl) {
+      donorChangeEl.textContent = donors.length === 0 ? 'Awaiting records' : `↑ ${donors.length} active`;
+    }
+    const upcomingChangeEl = document.getElementById('statUpcomingChange');
+    if (upcomingChangeEl) {
+      upcomingChangeEl.textContent = events.length === 0 ? 'No camps scheduled' : `${events.length} upcoming`;
+    }
+    const urgentChangeEl = document.getElementById('statUrgentChange');
+    if (urgentChangeEl) {
+      urgentChangeEl.textContent = urgentCount === 0 ? 'None active' : `${urgentCount} active alert${urgentCount > 1 ? 's' : ''}`;
+    }
+
+    // Update user info
+    if (user) {
+      document.getElementById('sidebarUserName').textContent  = user.name;
+      document.getElementById('sidebarUserRole').textContent  = user.role === 'admin' ? 'Administrator' : 'NSS Volunteer';
+      document.getElementById('sidebarAvatar').textContent    = user.name.charAt(0);
+      document.getElementById('topbarAvatar').textContent     = user.name.charAt(0);
+      document.getElementById('adminWelcome').textContent     = `Welcome back, ${user.name.split(' ')[0]}! (${user.role === 'admin' ? 'NSS Program Officer' : 'NSS Volunteer' + (user.batchNo ? ' · Batch ' + user.batchNo : '')})`;
+    }
+
+    const notifDot = document.getElementById('notifDot');
+    if (notifDot) notifDot.style.display = urgentCount > 0 ? 'block' : 'none';
+
+    // Donors table
+    renderDonorsTable(donors);
+
+    // Volunteers table
+    renderVolunteersTable(volunteers);
+
+    // Blood availability
+    const bloodGrid = document.getElementById('bloodAvailGrid');
+    const bgCounts = {};
+    DB.bloodGroups.forEach(g => bgCounts[g] = 0);
+    donors.filter(d => d.available).forEach(d => { if (bgCounts[d.blood] !== undefined) bgCounts[d.blood]++; });
+    bloodGrid.innerHTML = DB.bloodGroups.map(g => {
+      const count = bgCounts[g];
+      const status = count === 0 ? 'urgent' : count <= 2 ? 'limited' : 'available';
+      return `<div class="ba-item">
+        <div class="ba-group">${g}</div>
+        <div class="ba-count">${count} donors</div>
+        <div class="ba-status ${status}"></div>
+      </div>`;
+    }).join('');
+
+    // Upcoming events
+    const evWidget = document.getElementById('upcomingEventsWidget');
+    evWidget.innerHTML = events.slice(0, 3).map(ev => {
+      const d = formatDateShort(ev.date);
+      return `<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);">
+        <div style="background:var(--red-50);border-radius:var(--radius);padding:8px 12px;text-align:center;min-width:50px;border:1px solid var(--red-100);">
+          <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:var(--red-600);">${d.month}</div>
+          <div style="font-size:1.2rem;font-weight:800;color:var(--red-700);font-family:var(--font-display);">${d.day}</div>
+        </div>
+        <div>
+          <div style="font-size:0.9rem;font-weight:600;color:var(--gray-900);">${ev.title}</div>
+          <div style="font-size:0.8rem;color:var(--gray-400);">${ev.venue}</div>
+          <div style="font-size:0.78rem;color:var(--gray-400);">${ev.totalSlots - ev.filledSlots} slots remaining</div>
+        </div>
+      </div>`;
+    }).join('') || '<div style="text-align:center;padding:24px 10px;color:var(--gray-400);"><div style="font-size:1.5rem;margin-bottom:6px;">📅</div><p style="margin:0;font-size:0.88rem;color:var(--gray-500);">No upcoming camps scheduled</p><small style="color:var(--gray-400);">Use "New Event" above to create real camps.</small></div>';
+
+    // Recent Activity
+    const actList = document.getElementById('activityList');
+    const activities = ActivityStore.getAll();
+    if (activities.length === 0) {
+      actList.innerHTML = `
+        <div style="text-align:center;padding:36px 16px;color:var(--gray-400);width:100%;">
+          <div style="font-size:2rem;margin-bottom:8px;">📋</div>
+          <strong style="color:var(--gray-700);display:block;margin-bottom:4px;font-size:0.95rem;">No Activity Recorded Yet</strong>
+          <span style="font-size:0.82rem;color:var(--gray-500);">Activity logs will appear automatically as donors register, donations are marked, and camps are organized.</span>
+        </div>`;
+    } else {
+      actList.innerHTML = activities.map(a => `
+        <div class="activity-item">
+          <div class="activity-icon ${a.type}">${a.icon}</div>
+          <div class="activity-text"><strong>${a.title}</strong><span>${a.desc}</span></div>
+          <div class="activity-time">${a.time}</div>
+        </div>
+      `).join('');
+    }
+  }
+
+  function renderDonorsTable(donors) {
+    const tbody = document.getElementById('donorsTableBody');
+    if (!donors || donors.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:48px 20px;color:var(--gray-400);">
+        <div style="font-size:2rem;margin-bottom:8px;">🩸</div>
+        <strong style="color:var(--gray-700);display:block;margin-bottom:4px;font-size:1rem;">Donor Database Empty</strong>
+        <span style="font-size:0.85rem;color:var(--gray-500);">Sample data removed. Waiting for real donor records to be added.</span>
+      </td></tr>`;
+      return;
+    }
+    tbody.innerHTML = donors.slice(0, 15).map(d => `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:34px;height:34px;border-radius:50%;background:var(--red-600);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;flex-shrink:0;">${d.name.charAt(0)}</div>
+            <div>
+              <div style="font-weight:600;color:var(--gray-900);font-size:0.88rem;">${d.name}</div>
+              <div style="font-size:0.75rem;color:var(--gray-400);">${d.rollNo}</div>
+            </div>
+          </div>
+        </td>
+        <td><span style="font-family:var(--font-display);font-weight:800;color:var(--red-700);font-size:1rem;">${d.blood}</span></td>
+        <td><span style="font-size:0.85rem;">${d.dept}</span></td>
+        <td><span style="font-weight:600;color:var(--gray-700);">${d.donations}</span></td>
+        <td>
+          ${d.available
+            ? '<span class="badge badge-success">Available</span>'
+            : '<span class="badge badge-gray">Unavailable</span>'}
+        </td>
+        <td>
+          <div class="action-group">
+            <button class="action-btn" onclick="toggleAvailability(${d.id})" title="Toggle availability">↕️</button>
+            <button class="action-btn danger" onclick="confirmDelete(${d.id})" title="Delete donor">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderVolunteersTable(list) {
+    const tbody = document.getElementById('volunteersTableBody');
+    if (!tbody) return;
+    const items = list || DB.volunteers || [];
+    if (items.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--gray-400);">No volunteers found.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = items.map((v, idx) => `
+      <tr>
+        <td style="color:var(--gray-400);font-size:0.85rem;font-weight:600;">${v.id || (idx + 1)}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--red-600),var(--red-800));color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.82rem;flex-shrink:0;">${v.name.charAt(0)}</div>
+            <div>
+              <div style="font-weight:700;color:var(--gray-900);font-size:0.88rem;">${v.name}</div>
+              <div style="font-size:0.72rem;color:var(--gray-400);">${v.deptCode || ''}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span style="font-family:monospace;font-size:0.92rem;font-weight:700;background:var(--gray-100);padding:3px 10px;border-radius:4px;color:var(--red-700);letter-spacing:0.04em;">${v.batchNo}</span>
+        </td>
+        <td><span style="font-size:0.82rem;color:var(--gray-600);">${v.dept}</span></td>
+        <td>
+          <span class="badge badge-success" style="font-size:0.75rem;">Active Volunteer</span>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function filterVolunteersTable() {
+    const q = (document.getElementById('volunteerSearchInput')?.value || '').toLowerCase().trim();
+    const filtered = (DB.volunteers || []).filter(v =>
+      v.name.toLowerCase().includes(q) ||
+      v.batchNo.includes(q) ||
+      v.dept.toLowerCase().includes(q) ||
+      (v.deptCode && v.deptCode.toLowerCase().includes(q))
+    );
+    renderVolunteersTable(filtered);
+  }
+
+  function handleNotificationClick() {
+    const reqs = typeof UrgentRequestStore !== 'undefined' ? UrgentRequestStore.getAll() : [];
+    if (reqs.length > 0) {
+      showToast('Urgent Alert: ' + reqs[0].bloodGroup + ' requested for ' + reqs[0].patient, 'warning');
+    } else {
+      showToast('No new notifications. Everything is up to date.', 'info');
+    }
+  }
+
+  function filterTable() {
+    const q     = document.getElementById('tableSearch').value.toLowerCase();
+    const blood = document.getElementById('tableBloodFilter').value;
+    const donors = DonorStore.getAll().filter(d => {
+      const matchQ = !q || d.name.toLowerCase().includes(q) || d.rollNo.toLowerCase().includes(q);
+      const matchB = !blood || d.blood === blood;
+      return matchQ && matchB;
+    });
+    renderDonorsTable(donors);
+  }
+
+  let deleteTargetId = null;
+  function confirmDelete(id) {
+    deleteTargetId = id;
+    openModal('deleteModal');
+  }
+  document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+    if (deleteTargetId) {
+      DonorStore.delete(deleteTargetId);
+      closeModal('deleteModal');
+      loadDashboard();
+      showToast('Donor removed successfully.', 'success');
+      deleteTargetId = null;
+    }
+  });
+
+  function toggleAvailability(id) {
+    const donor = DonorStore.getAll().find(d => d.id === id);
+    if (donor) {
+      DonorStore.update(id, { available: !donor.available });
+      loadDashboard();
+      showToast(`${donor.name} marked as ${donor.available ? 'Unavailable' : 'Available'}.`, 'info');
+    }
+  }
+
+  function exportCSV() {
+    const donors = DonorStore.getAll();
+    const headers = ['Name','Roll No','Department','Year','Blood Group','Phone','Donations','Last Donated','Available'];
+    const rows = donors.map(d => [d.name, d.rollNo, d.dept, d.year, d.blood, d.phone, d.donations, d.lastDonated || 'N/A', d.available ? 'Yes' : 'No']);
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a'); a.href = url; a.download = 'bloodlink_donors.csv'; a.click();
+    showToast('Donor list exported as CSV!', 'success');
+  }
+
+  // Quick search from topbar
+  document.getElementById('quickSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    const donors = DonorStore.getAll().filter(d => d.name.toLowerCase().includes(q) || d.rollNo.toLowerCase().includes(q));
+    renderDonorsTable(donors);
+  });
+
+  loadDashboard();
+</script>
+</body>
+</html>

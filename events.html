@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Upcoming blood donation camps and events organized by NSS Unit at your college."/>
+  <title>Events & Camps — BloodLink NSS Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .events-page { padding: 80px 0 100px; }
+    .events-layout { display: grid; grid-template-columns: 1fr 340px; gap: 32px; }
+    .events-list { display: flex; flex-direction: column; gap: 24px; }
+    .event-full-card {
+      background: white; border: 1px solid var(--gray-100);
+      border-radius: var(--radius-xl); overflow: hidden;
+      box-shadow: var(--shadow-sm); transition: var(--transition);
+    }
+    .event-full-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+    .event-full-header {
+      background: linear-gradient(135deg, var(--red-800), var(--red-600));
+      padding: 24px 28px;
+      display: flex; align-items: flex-start; gap: 20px;
+    }
+    .event-full-date {
+      background: rgba(255,255,255,0.15);
+      border-radius: var(--radius-lg);
+      padding: 12px 16px; text-align: center; color: white;
+      min-width: 64px; border: 1px solid rgba(255,255,255,0.2);
+    }
+    .event-full-date .day { font-size: 2rem; font-weight: 800; font-family: var(--font-display); line-height: 1; }
+    .event-full-date .month { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .event-full-date .year { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .event-full-title-block { flex: 1; }
+    .event-full-title-block h2 { color: white; font-size: 1.3rem; font-weight: 800; margin-bottom: 6px; }
+    .event-full-title-block .organizer { color: rgba(255,255,255,0.75); font-size: 0.85rem; }
+    .event-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .event-tag {
+      background: rgba(255,255,255,0.15); color: white;
+      padding: 3px 12px; border-radius: var(--radius-full);
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em;
+    }
+    .event-status-badge {
+      padding: 6px 14px; border-radius: var(--radius-full);
+      font-size: 0.78rem; font-weight: 700;
+      background: rgba(255,255,255,0.2); color: white;
+      align-self: flex-start; white-space: nowrap;
+    }
+    .event-full-body { padding: 24px 28px; }
+    .event-full-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .event-meta-row { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: var(--gray-600); }
+    .event-meta-row .mi { font-size: 1.1rem; }
+    .event-desc { font-size: 0.92rem; color: var(--gray-600); line-height: 1.7; margin-bottom: 20px; }
+    .event-progress-section { background: var(--gray-50); border-radius: var(--radius); padding: 16px; margin-bottom: 20px; }
+    .event-progress-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 600; color: var(--gray-600); margin-bottom: 8px; }
+    .event-progress-bar { height: 10px; background: var(--gray-200); border-radius: 99px; overflow: hidden; }
+    .event-progress-fill { height: 100%; background: linear-gradient(to right, var(--red-600), var(--red-400)); border-radius: 99px; }
+    .event-footer-actions { display: flex; gap: 12px; }
+
+    /* SIDEBAR WIDGETS */
+    .event-sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-widget {
+      background: white; border: 1px solid var(--gray-100);
+      border-radius: var(--radius-xl); padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .sw-title { font-size: 0.95rem; font-weight: 700; color: var(--gray-900); margin-bottom: 16px; }
+    .eligibility-list { display: flex; flex-direction: column; gap: 10px; }
+    .elig-item { display: flex; justify-content: space-between; font-size: 0.85rem; padding-bottom: 10px; border-bottom: 1px solid var(--gray-100); }
+    .elig-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .elig-key { color: var(--gray-500); }
+    .elig-val { font-weight: 600; color: var(--gray-800); text-align: right; max-width: 160px; }
+    .faq-item { margin-bottom: 14px; }
+    .faq-q { font-size: 0.88rem; font-weight: 700; color: var(--gray-800); margin-bottom: 6px; cursor: pointer; }
+    .faq-a { font-size: 0.83rem; color: var(--gray-500); line-height: 1.6; }
+
+    @media(max-width:900px) { .events-layout{grid-template-columns:1fr;} }
+    @media(max-width:640px) { .event-full-meta{grid-template-columns:1fr;} .event-tags{display:none;} }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo"><div class="logo-drop">🩸</div><div class="logo-text"><span class="logo-title">BloodLink</span><span class="logo-sub">NSS Unit</span></div></a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="about.html" class="nav-link">About NSS</a></li>
+        <li><a href="donors.html" class="nav-link">Donors</a></li>
+        <li><a href="search.html" class="nav-link">Find Blood</a></li>
+        <li><a href="events.html" class="nav-link active">Events</a></li>
+        <li><a href="contact.html" class="nav-link">Contact</a></li>
+        <li class="mobile-nav-actions">
+          <a href="login.html" class="btn btn-outline btn-block">Login</a>
+          <a href="register.html" class="btn btn-primary btn-block">Donate Blood</a>
+        </li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-outline" id="loginBtn">Login</a>
+        <a href="register.html" class="btn btn-primary" id="registerBtn">Donate Blood</a>
+      </div>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="container page-header-content">
+      <div class="breadcrumb"><a href="index.html">Home</a><span class="breadcrumb-sep">›</span><span>Events</span></div>
+      <h1>Donation Camps & Events</h1>
+      <p>Stay updated on upcoming blood donation drives organized by our NSS Unit. Register your slot today!</p>
+    </div>
+  </div>
+
+  <div class="events-page">
+    <div class="container">
+      <div class="events-layout">
+
+        <!-- Events List -->
+        <div>
+          <div class="events-list" id="eventsList"></div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="event-sidebar">
+
+          <!-- Register CTA -->
+          <div class="sidebar-widget" style="background:linear-gradient(135deg,var(--red-800),var(--red-600));color:white;">
+            <div class="sw-title" style="color:white;">Not a donor yet?</div>
+            <p style="font-size:0.88rem;opacity:0.8;margin-bottom:16px;">Register now and be part of the next blood donation camp. Takes only 2 minutes!</p>
+            <a href="register.html" class="btn btn-white btn-block">Register as Donor →</a>
+          </div>
+
+          <!-- Eligibility Criteria -->
+          <div class="sidebar-widget">
+            <div class="sw-title">🩺 Eligibility Criteria</div>
+            <div class="eligibility-list" id="eligibilityList"></div>
+          </div>
+
+          <!-- FAQ -->
+          <div class="sidebar-widget">
+            <div class="sw-title">❓ Common Questions</div>
+            <div id="faqList"></div>
+          </div>
+
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top:1px solid #222;padding-top:24px;">
+        <p>© 2026 BloodLink NSS Portal — Your College</p>
+        <p><a href="index.html" style="color:var(--red-400);">← Back to Home</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    function renderEvents() {
+      const list = document.getElementById('eventsList');
+      const all  = EventStore.getAll().sort((a,b) => new Date(a.date) - new Date(b.date));
+
+      if (all.length === 0) {
+        list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📅</div><div class="empty-state-title">No events scheduled yet</div><div class="empty-state-desc">Check back soon or contact the NSS unit.</div></div>`;
+        return;
+      }
+
+      const today = new Date();
+      list.innerHTML = all.map(ev => {
+        const d   = new Date(ev.date);
+        const isPast = d < today;
+        const pct  = Math.round((ev.filledSlots / ev.totalSlots) * 100);
+        return `
+        <div class="event-full-card">
+          <div class="event-full-header">
+            <div class="event-full-date">
+              <div class="month">${d.toLocaleString('en',{month:'short'}).toUpperCase()}</div>
+              <div class="day">${d.getDate()}</div>
+              <div class="year">${d.getFullYear()}</div>
+            </div>
+            <div class="event-full-title-block">
+              <h2>${ev.title}</h2>
+              <div class="organizer">Organized by: ${ev.organizer}</div>
+              <div class="event-tags">${(ev.tags||[]).map(t=>`<span class="event-tag">${t}</span>`).join('')}</div>
+            </div>
+            <div class="event-status-badge">${isPast ? '✅ Completed' : '🟢 Upcoming'}</div>
+          </div>
+          <div class="event-full-body">
+            <div class="event-full-meta">
+              <div class="event-meta-row"><span class="mi">🕐</span>${ev.time}</div>
+              <div class="event-meta-row"><span class="mi">📍</span>${ev.venue}</div>
+            </div>
+            <p class="event-desc">${ev.description}</p>
+            <div class="event-progress-section">
+              <div class="event-progress-label">
+                <span>${ev.filledSlots} registered</span>
+                <span>${ev.totalSlots - ev.filledSlots} slots remaining of ${ev.totalSlots}</span>
+              </div>
+              <div class="event-progress-bar"><div class="event-progress-fill" style="width:${pct}%"></div></div>
+            </div>
+            <div class="event-footer-actions">
+              ${isPast
+                ? `<button class="btn btn-outline" style="flex:1;opacity:0.6;" disabled>Camp Concluded</button>`
+                : `<button class="btn btn-primary" style="flex:1;" onclick="registerSlot(${ev.id})">Register My Slot</button>`}
+              <button class="btn btn-outline" onclick="shareEvent('${ev.title}')">Share 📤</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function registerSlot(evId) {
+      const user = Auth.loadSession();
+      if (!user) {
+        showToast('Please login to register for an event.', 'info');
+        setTimeout(() => window.location.href = 'login.html', 1500);
+        return;
+      }
+      const events = EventStore.getAll();
+      const ev = events.find(e => e.id === evId);
+      if (ev && ev.filledSlots < ev.totalSlots) {
+        const idx = events.indexOf(ev);
+        events[idx].filledSlots++;
+        EventStore.save(events);
+        showToast(`You're registered for "${ev.title}"! 🎉`, 'success');
+        renderEvents();
+      }
+    }
+
+    function shareEvent(title) {
+      if (navigator.share) {
+        navigator.share({ title: 'BloodLink NSS', text: `Join us for "${title}" - NSS Blood Donation Camp!`, url: window.location.href });
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        showToast('Link copied to clipboard!', 'info');
+      }
+    }
+
+    // Eligibility
+    document.getElementById('eligibilityList').innerHTML = DB.eligibility.map(e =>
+      `<div class="elig-item"><span class="elig-key">${e.label}</span><span class="elig-val">${e.value}</span></div>`
+    ).join('');
+
+    // FAQ
+    document.getElementById('faqList').innerHTML = DB.faqs.map((f,i) =>
+      `<div class="faq-item">
+        <div class="faq-q" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+          ▸ ${f.q}
+        </div>
+        <div class="faq-a" style="display:${i===0?'block':'none'}">${f.a}</div>
+      </div>`
+    ).join('');
+
+    renderEvents();
+  </script>
+</body>
+</html>

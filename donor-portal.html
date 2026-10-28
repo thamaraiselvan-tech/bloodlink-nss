@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Donor Portal — BloodLink NSS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <style>
+    .donor-profile-card {
+      background: linear-gradient(135deg, var(--red-800), var(--red-600));
+      border-radius: var(--radius-xl); padding: 32px;
+      display: flex; align-items: center; gap: 24px; margin-bottom: 28px;
+    }
+    .donor-profile-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 800; color: white;
+    }
+    .donor-profile-info { flex: 1; }
+    .donor-profile-name { font-size: 1.4rem; font-weight: 800; color: white; font-family: var(--font-display); }
+    .donor-profile-meta { font-size: 0.88rem; color: rgba(255,255,255,0.7); margin-top: 4px; }
+    .donor-profile-blood {
+      background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4);
+      color: white; padding: 10px 20px; border-radius: var(--radius-full);
+      font-family: var(--font-display); font-size: 1.6rem; font-weight: 800;
+    }
+    .eligibility-card {
+      border-radius: var(--radius-xl); padding: 24px; text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .eligibility-card.eligible { background: #d1fae5; border: 1px solid #a7f3d0; }
+    .eligibility-card.ineligible { background: var(--red-50); border: 1px solid var(--red-100); }
+    .elig-icon { font-size: 2rem; }
+    .elig-status { font-size: 1rem; font-weight: 700; }
+    .eligibility-card.eligible .elig-status { color: #065f46; }
+    .eligibility-card.ineligible .elig-status { color: var(--red-700); }
+    .elig-detail { font-size: 0.82rem; color: var(--gray-500); }
+  </style>
+</head>
+<body>
+
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-drop" style="font-size:1.6rem;">🩸</div>
+      <div class="logo-text">
+        <span class="logo-title" style="color:var(--red-400);font-size:1rem;font-weight:800;">BloodLink</span>
+        <span class="logo-sub" style="color:var(--gray-500);font-size:0.65rem;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;">Donor Portal</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">My Account</div>
+      <a class="sidebar-link active" href="donor-portal.html"><span class="icon">🏠</span> My Dashboard</a>
+      <a class="sidebar-link" href="#" onclick="showSection('profile')"><span class="icon">👤</span> My Profile</a>
+      <a class="sidebar-link" href="#" onclick="showSection('history')"><span class="icon">🩸</span> Donation History</a>
+      <div class="sidebar-section-label">Actions</div>
+      <a class="sidebar-link" href="search.html"><span class="icon">🔍</span> Find Blood</a>
+      <a class="sidebar-link" href="events.html"><span class="icon">📅</span> Upcoming Events</a>
+      <a class="sidebar-link" href="contact.html"><span class="icon">🆘</span> Emergency Request</a>
+      <div class="sidebar-section-label">Portal</div>
+      <a class="sidebar-link" href="index.html"><span class="icon">🏡</span> Back to Home</a>
+      <a class="sidebar-link" href="javascript:void(0)" onclick="Auth.logout()"><span class="icon">🚪</span> Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" id="sidebarUser" onclick="Auth.logout()" title="Click to Logout">
+        <div class="user-avatar-sm" id="sidebarAvatar">D</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">Donor</div>
+          <div class="user-role">Blood Donor</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="dashboard-main">
+    <div class="dashboard-topbar">
+      <div class="topbar-title">Donor Dashboard</div>
+      <div class="topbar-right">
+        <a href="index.html" class="btn btn-outline btn-sm">View Portal</a>
+        <button class="btn btn-outline btn-sm" onclick="Auth.logout()" style="gap:4px;">🚪 Logout</button>
+        <div class="user-avatar-sm" id="topbarAvatar" onclick="Auth.logout()" title="Click to Logout" style="cursor:pointer;">D</div>
+      </div>
+    </div>
+
+    <div class="dashboard-content">
+
+      <div class="page-title" id="welcomeTitle">My Donor Dashboard</div>
+      <p class="page-subtitle" id="welcomeSubtitle">Track your donation history and manage your donor profile.</p>
+
+      <!-- Profile Card -->
+      <div class="donor-profile-card" id="profileCard">
+        <div class="donor-profile-avatar" id="profileAvatar">D</div>
+        <div class="donor-profile-info">
+          <div class="donor-profile-name" id="profileName">Donor Name</div>
+          <div class="donor-profile-meta" id="profileMeta">Roll No · Department</div>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+            <span id="profileAvailBadge" class="badge badge-success">✓ Available to Donate</span>
+            <span class="badge badge-info" id="profileDonationBadge">🩸 0 Donations</span>
+          </div>
+        </div>
+        <div class="donor-profile-blood" id="profileBlood">O+</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:28px;">
+        <div class="stat-card">
+          <div class="stat-card-icon red">🩸</div>
+          <div class="stat-card-body">
+            <div class="stat-card-val" id="myDonations">—</div>
+            <div class="stat-card-label">Total Donations</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon green">💚</div>
+          <div class="stat-card-body">
+            <div class="stat-card-val" id="livesSaved">—</div>
+            <div class="stat-card-label">Lives Saved (est.)</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon blue">📅</div>
+          <div class="stat-card-body">
+            <div class="stat-card-val" id="daysSinceDonation">—</div>
+            <div class="stat-card-label">Days Since Last Donation</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Eligibility Card -->
+        <div class="widget">
+          <div class="widget-header">
+            <div class="widget-title">Donation Eligibility</div>
+          </div>
+          <div class="widget-body">
+            <div class="eligibility-card eligible" id="eligCard">
+              <div class="elig-icon" id="eligIcon">✅</div>
+              <div class="elig-status" id="eligStatus">Eligible to Donate!</div>
+              <div class="elig-detail" id="eligDetail">You can donate blood now. Find an upcoming camp or contact the NSS unit.</div>
+            </div>
+            <div style="margin-top:20px;">
+              <a href="events.html" class="btn btn-primary btn-block">View Upcoming Camps →</a>
+            </div>
+            <div style="margin-top:12px;padding:14px;background:var(--gray-50);border-radius:var(--radius);font-size:0.82rem;color:var(--gray-500);line-height:1.6;">
+              <strong style="color:var(--gray-700);">Next donation allowed after:</strong><br>
+              <span id="nextDonationDate" style="color:var(--red-600);font-weight:600;">Calculating…</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="widget">
+          <div class="widget-header">
+            <div class="widget-title">Upcoming Camps</div>
+            <a href="events.html" class="widget-action">View All</a>
+          </div>
+          <div class="widget-body" id="donorEventsWidget"></div>
+        </div>
+      </div>
+
+      <!-- Availability Toggle -->
+      <div class="widget" style="margin-top:24px;">
+        <div class="widget-header">
+          <div class="widget-title">My Availability</div>
+        </div>
+        <div class="widget-body" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+          <div>
+            <p style="font-size:0.9rem;color:var(--gray-600);margin-bottom:4px;">Toggle whether you're currently available to receive blood donation requests.</p>
+            <p style="font-size:0.8rem;color:var(--gray-400);">When available, your name may appear in search results for matching blood groups.</p>
+          </div>
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+            <span id="availLabel" style="font-weight:600;color:var(--gray-700);">Available</span>
+            <div style="position:relative;width:52px;height:28px;">
+              <input type="checkbox" id="availToggle" style="opacity:0;width:0;height:0;position:absolute;">
+              <div id="availSlider" onclick="toggleAvailability()" style="position:absolute;inset:0;background:var(--red-500);border-radius:99px;cursor:pointer;transition:0.3s;display:flex;align-items:center;padding:3px;">
+                <div style="width:22px;height:22px;background:white;border-radius:50%;transition:0.3s;transform:translateX(0);" id="availThumb"></div>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="toast-container"></div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+  const user = Auth.loadSession();
+  if (!user) { window.location.href = 'login.html'; }
+
+  let myDonorData = user?.donorId ? DonorStore.getAll().find(d => d.id === user.donorId) : DonorStore.getAll()[0]; // demo fallback
+
+  function loadPortal() {
+    if (!user) return;
+    document.getElementById('sidebarUserName').textContent = user.name;
+    document.getElementById('sidebarAvatar').textContent   = user.name.charAt(0);
+    document.getElementById('topbarAvatar').textContent    = user.name.charAt(0);
+    document.getElementById('welcomeTitle').textContent    = `Welcome, ${user.name.split(' ')[0]}! 👋`;
+    document.getElementById('welcomeSubtitle').textContent = "Here's your donor profile and status at a glance.";
+
+    if (!myDonorData) return;
+    const d = myDonorData;
+    document.getElementById('profileAvatar').textContent     = d.name.charAt(0);
+    document.getElementById('profileName').textContent       = d.name;
+    document.getElementById('profileMeta').textContent       = `${d.rollNo} · ${d.dept} · ${d.year} Year`;
+    document.getElementById('profileBlood').textContent      = d.blood;
+    document.getElementById('profileDonationBadge').textContent = `🩸 ${d.donations} Donation${d.donations!==1?'s':''}`;
+    document.getElementById('profileAvailBadge').textContent = d.available ? '✓ Available' : '✗ Unavailable';
+    document.getElementById('profileAvailBadge').className   = d.available ? 'badge badge-success' : 'badge badge-gray';
+
+    document.getElementById('myDonations').textContent  = d.donations;
+    document.getElementById('livesSaved').textContent   = d.donations * 3;
+
+    const days = d.lastDonated ? daysSince(d.lastDonated) : 999;
+    document.getElementById('daysSinceDonation').textContent = d.lastDonated ? `${days}d` : 'N/A';
+
+    const eligible = canDonateAgain(d.lastDonated || '2000-01-01');
+    const eligCard = document.getElementById('eligCard');
+    eligCard.className = `eligibility-card ${eligible ? 'eligible' : 'ineligible'}`;
+    document.getElementById('eligIcon').textContent   = eligible ? '✅' : '⏳';
+    document.getElementById('eligStatus').textContent = eligible ? 'Eligible to Donate!' : 'Not Yet Eligible';
+    document.getElementById('eligDetail').textContent = eligible
+      ? 'You can donate blood now. Find an upcoming camp or contact the NSS unit.'
+      : `You need to wait ${90 - days} more days before your next donation.`;
+
+    if (d.lastDonated) {
+      const next = new Date(d.lastDonated);
+      next.setDate(next.getDate() + 90);
+      document.getElementById('nextDonationDate').textContent = next.toLocaleDateString('en-IN', {day:'numeric',month:'long',year:'numeric'});
+    } else {
+      document.getElementById('nextDonationDate').textContent = 'You can donate any time!';
+    }
+
+    // Availability toggle
+    const toggle = document.getElementById('availToggle');
+    const thumb  = document.getElementById('availThumb');
+    const slider = document.getElementById('availSlider');
+    const label  = document.getElementById('availLabel');
+    if (d.available) {
+      slider.style.background = 'var(--red-500)';
+      thumb.style.transform = 'translateX(24px)';
+      label.textContent = 'Available';
+    } else {
+      slider.style.background = 'var(--gray-300)';
+      thumb.style.transform = 'translateX(0)';
+      label.textContent = 'Unavailable';
+    }
+
+    // Events
+    const events = EventStore.getUpcoming().slice(0, 3);
+    document.getElementById('donorEventsWidget').innerHTML = events.length > 0
+      ? events.map(ev => {
+          const d2 = formatDateShort(ev.date);
+          return `<div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);">
+            <div style="background:var(--red-50);border-radius:var(--radius);padding:8px 12px;text-align:center;min-width:52px;border:1px solid var(--red-100);">
+              <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:var(--red-600);">${d2.month}</div>
+              <div style="font-size:1.3rem;font-weight:800;color:var(--red-700);font-family:var(--font-display);">${d2.day}</div>
+            </div>
+            <div>
+              <div style="font-size:0.9rem;font-weight:600;color:var(--gray-900);">${ev.title}</div>
+              <div style="font-size:0.8rem;color:var(--gray-400);">${ev.venue}</div>
+            </div>
+          </div>`;
+        }).join('')
+      : '<p style="color:var(--gray-400);font-size:0.9rem;">No upcoming events. Check back soon!</p>';
+  }
+
+  function toggleAvailability() {
+    if (!myDonorData) return;
+    DonorStore.update(myDonorData.id, { available: !myDonorData.available });
+    myDonorData = DonorStore.getAll().find(d => d.id === myDonorData.id);
+    loadPortal();
+    showToast(`Status updated: ${myDonorData.available ? 'Available' : 'Unavailable'}`, 'success');
+  }
+
+  function showSection(section) {
+    if (section === 'profile') {
+      document.getElementById('profileCard')?.scrollIntoView({ behavior: 'smooth' });
+      showToast('Viewing your Donor Profile', 'info');
+    } else if (section === 'history') {
+      document.getElementById('myDonations')?.scrollIntoView({ behavior: 'smooth' });
+      showToast('Viewing Donation History', 'info');
+    }
+  }
+
+  loadPortal();
+</script>
+</body>
+</html>

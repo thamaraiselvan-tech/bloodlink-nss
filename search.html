@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Search for blood donors at your college. Find donors by blood group, department, and availability."/>
+  <title>Find Blood — BloodLink NSS Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .search-section { padding: 60px 0 80px; background: var(--gray-50); min-height: calc(100vh - var(--nav-height)); }
+    .search-box {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-md);
+    }
+    .search-box-title { font-size: 1.1rem; font-weight: 700; color: var(--gray-900); margin-bottom: 24px; display:flex; align-items:center; gap:8px; }
+    .search-controls { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 14px; align-items: end; }
+    .donors-grid-wrapper { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .donor-result-card {
+      background: white;
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .donor-result-card:hover { box-shadow: var(--shadow-red); border-color: var(--red-200); transform: translateY(-4px); }
+    .donor-card-header {
+      background: linear-gradient(135deg, var(--red-800), var(--red-600));
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .donor-card-avatar {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: 800; color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    .donor-card-info { flex: 1; }
+    .donor-card-name { font-weight: 700; color: white; font-size: 1rem; }
+    .donor-card-roll { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+    .donor-card-blood-badge {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+    .donor-card-body { padding: 18px 20px; }
+    .donor-card-detail { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--gray-500); margin-bottom: 8px; }
+    .donor-card-detail:last-child { margin-bottom: 0; }
+    .donor-card-footer { padding: 14px 20px; border-top: 1px solid var(--gray-100); display: flex; gap: 10px; }
+    .available-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .available-dot.yes { background: #10b981; }
+    .available-dot.no  { background: var(--gray-300); }
+
+    .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .results-count { font-size: 0.9rem; color: var(--gray-500); }
+    .results-count strong { color: var(--gray-900); }
+
+    .empty-state { text-align: center; padding: 80px 20px; }
+    .empty-state-icon { font-size: 4rem; margin-bottom: 16px; }
+    .empty-state-title { font-size: 1.2rem; font-weight: 700; color: var(--gray-700); margin-bottom: 8px; }
+    .empty-state-desc { font-size: 0.9rem; color: var(--gray-400); }
+
+    .compat-section { background: white; border: 1px solid var(--gray-100); border-radius: var(--radius-xl); padding: 28px; margin-bottom: 32px; box-shadow: var(--shadow-sm); }
+    .compat-title { font-size: 1rem; font-weight: 700; color: var(--gray-900); margin-bottom: 16px; display:flex; align-items:center; gap:8px; }
+    .compat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .compat-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gray-500); margin-bottom: 8px; }
+    .compat-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .compat-tag {
+      background: var(--red-50); color: var(--red-700);
+      border: 1px solid var(--red-100);
+      padding: 4px 12px; border-radius: var(--radius-full);
+      font-size: 0.82rem; font-weight: 700; font-family: var(--font-display);
+    }
+    .compat-tag.receive { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+
+    @media(max-width:1024px){ .search-controls{grid-template-columns:1fr 1fr;} .donors-grid-wrapper{grid-template-columns:1fr 1fr;} }
+    @media(max-width:640px){ .donors-grid-wrapper{grid-template-columns:1fr;} .search-controls{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo"><div class="logo-drop">🩸</div><div class="logo-text"><span class="logo-title">BloodLink</span><span class="logo-sub">NSS Unit</span></div></a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="about.html" class="nav-link">About NSS</a></li>
+        <li><a href="donors.html" class="nav-link">Donors</a></li>
+        <li><a href="search.html" class="nav-link active">Find Blood</a></li>
+        <li><a href="events.html" class="nav-link">Events</a></li>
+        <li><a href="contact.html" class="nav-link">Contact</a></li>
+        <li class="mobile-nav-actions">
+          <a href="login.html" class="btn btn-outline btn-block">Login</a>
+          <a href="register.html" class="btn btn-primary btn-block">Donate Blood</a>
+        </li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-outline" id="loginBtn">Login</a>
+        <a href="register.html" class="btn btn-primary" id="registerBtn">Donate Blood</a>
+      </div>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="container page-header-content">
+      <div class="breadcrumb"><a href="index.html">Home</a><span class="breadcrumb-sep">›</span><span>Find Blood</span></div>
+      <h1>Find a Blood Donor</h1>
+      <p>Search our database of registered donors from your college. Filter by blood group, department, and availability.</p>
+    </div>
+  </div>
+
+  <div class="search-section">
+    <div class="container">
+
+      <!-- Search Box -->
+      <div class="search-box">
+        <div class="search-box-title">🔍 Search Donors</div>
+        <div class="search-controls">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Name / Roll No</label>
+            <input type="text" class="form-input" id="searchQuery" placeholder="e.g. Ravi or CS21001">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Blood Group</label>
+            <select class="form-select" id="filterBlood">
+              <option value="">All Groups</option>
+              <option>A+</option><option>A-</option>
+              <option>B+</option><option>B-</option>
+              <option>O+</option><option>O-</option>
+              <option>AB+</option><option>AB-</option>
+              <option>A1+</option><option>A1-</option>
+              <option>A1B+</option><option>A1B-</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Department</label>
+            <select class="form-select" id="filterDept">
+              <option value="">All Depts</option>
+              <option value="AIML">AIML</option>
+              <option value="AIDS">AIDS</option>
+              <option value="CSBS">CSBS</option>
+              <option value="ECE">ECE</option>
+              <option value="IT">IT</option>
+              <option value="MECH">MECH</option>
+              <option value="CSE">CSE</option>
+              <option value="EEE">EEE</option>
+              <option value="CIVIL">CIVIL</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Availability</label>
+            <select class="form-select" id="filterAvail">
+              <option value="">All</option>
+              <option value="true">Available Now</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="runSearch()" style="height:46px;">Search</button>
+        </div>
+      </div>
+
+      <!-- Compatibility Guide (shows when blood group selected) -->
+      <div class="compat-section" id="compatSection" style="display:none;">
+        <div class="compat-title">🔬 Blood Compatibility Guide for <span id="compatGroupLabel"></span></div>
+        <div class="compat-grid">
+          <div class="compat-group">
+            <div class="compat-label">Can Donate To</div>
+            <div class="compat-tags" id="compatDonateTo"></div>
+          </div>
+          <div class="compat-group">
+            <div class="compat-label">Can Receive From</div>
+            <div class="compat-tags" id="compatReceiveFrom"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="results-header">
+        <div class="results-count">Showing <strong id="resultCount">0</strong> donors</div>
+        <div style="display:flex;gap:8px;">
+          <span style="font-size:0.82rem;color:var(--gray-400);">🟢 Available &nbsp; ⚪ Not available now</span>
+        </div>
+      </div>
+
+      <div class="donors-grid-wrapper" id="donorsResultGrid"></div>
+    </div>
+  </div>
+
+  <!-- Contact Donor Modal -->
+  <div class="modal-overlay" id="contactModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Contact Donor</h3>
+        <button class="modal-close" onclick="closeModal('contactModal')">✕</button>
+      </div>
+      <div id="contactModalBody"></div>
+    </div>
+  </div>
+
+  <div class="toast-container"></div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top:1px solid #222;padding-top:24px;">
+        <p>© 2026 BloodLink NSS Portal — Your College</p>
+        <p><a href="index.html" style="color:var(--red-400);">← Back to Home</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Pre-fill blood group from URL param
+    const urlParams = new URLSearchParams(window.location.search);
+    const preGroup = urlParams.get('bg');
+    if (preGroup) {
+      document.getElementById('filterBlood').value = preGroup;
+      showCompatibility(preGroup);
+    }
+
+    document.getElementById('filterBlood').addEventListener('change', function() {
+      if (this.value) showCompatibility(this.value);
+      else document.getElementById('compatSection').style.display = 'none';
+    });
+
+    function showCompatibility(group) {
+      const compat = DB.compatibility[group];
+      if (!compat) return;
+      document.getElementById('compatSection').style.display = 'block';
+      document.getElementById('compatGroupLabel').textContent = group;
+      document.getElementById('compatDonateTo').innerHTML = compat.canDonateTo.map(g => `<span class="compat-tag">${g}</span>`).join('');
+      document.getElementById('compatReceiveFrom').innerHTML = compat.canReceiveFrom.map(g => `<span class="compat-tag receive">${g}</span>`).join('');
+    }
+
+    function runSearch() {
+      const query  = document.getElementById('searchQuery').value.trim();
+      const blood  = document.getElementById('filterBlood').value;
+      const dept   = document.getElementById('filterDept').value;
+      const avail  = document.getElementById('filterAvail').value;
+
+      const results = DonorStore.search({
+        bloodGroup: blood || null,
+        dept: dept || null,
+        available: avail === 'true' ? true : null,
+        query: query || null,
+      });
+
+      document.getElementById('resultCount').textContent = results.length;
+      renderResults(results);
+    }
+
+    function renderResults(donors) {
+      const grid = document.getElementById('donorsResultGrid');
+      if (donors.length === 0) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+          <div class="empty-state-icon">🔍</div>
+          <div class="empty-state-title">No donors found</div>
+          <div class="empty-state-desc">Try changing your search filters or <a href="contact.html" style="color:var(--red-600);">contact the NSS team</a> directly for urgent needs.</div>
+        </div>`;
+        return;
+      }
+      const colors = ['#e11d48','#be123c','#9f1239','#881337','#c2185b','#ad1457'];
+      grid.innerHTML = donors.map((d, i) => `
+        <div class="donor-result-card">
+          <div class="donor-card-header">
+            <div class="donor-card-avatar">${d.name.charAt(0)}</div>
+            <div class="donor-card-info">
+              <div class="donor-card-name">${d.name}</div>
+              <div class="donor-card-roll">${d.rollNo} · ${d.dept}</div>
+            </div>
+            <div class="donor-card-blood-badge">${d.blood}</div>
+          </div>
+          <div class="donor-card-body">
+            <div class="donor-card-detail">🎓 ${d.year} Year · ${d.dept}</div>
+            <div class="donor-card-detail">🩸 Donated <strong style="color:var(--red-600)">${d.donations}</strong> time${d.donations !== 1 ? 's' : ''}</div>
+            ${d.lastDonated ? `<div class="donor-card-detail">📅 Last donated: ${formatDate(d.lastDonated)}</div>` : '<div class="donor-card-detail">📅 First-time donor</div>'}
+            <div class="donor-card-detail">
+              <div class="available-dot ${d.available ? 'yes' : 'no'}"></div>
+              ${d.available ? '<span style="color:#059669;font-weight:600;">Available to donate</span>' : '<span>Not available right now</span>'}
+            </div>
+          </div>
+          <div class="donor-card-footer">
+            ${d.available
+              ? `<button class="btn btn-primary btn-sm" style="flex:1" onclick="openContact(${d.id})">📞 Contact</button>`
+              : `<button class="btn btn-outline btn-sm" style="flex:1;opacity:0.5;" disabled>Not Available</button>`}
+            <button class="btn btn-outline btn-sm" onclick="showToast('Emergency request sent to NSS team! 🚨', 'info')">🚨 Urgent</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openContact(donorId) {
+      const donor = DonorStore.getAll().find(d => d.id === donorId);
+      if (!donor) return;
+      document.getElementById('contactModalBody').innerHTML = `
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="width:72px;height:72px;border-radius:50%;background:var(--red-600);color:white;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;margin:0 auto 12px;">${donor.name.charAt(0)}</div>
+          <h3 style="font-size:1.2rem;font-weight:700;color:var(--gray-900);">${donor.name}</h3>
+          <div style="display:inline-block;background:var(--red-50);color:var(--red-700);border:1px solid var(--red-100);padding:4px 14px;border-radius:999px;font-family:var(--font-display);font-size:1.1rem;font-weight:800;margin-top:6px;">${donor.blood}</div>
+        </div>
+        <div style="background:var(--gray-50);border-radius:var(--radius);padding:16px;margin-bottom:20px;">
+          <p style="font-size:0.88rem;color:var(--gray-600);line-height:1.8;">
+            📱 <strong>Phone:</strong> ${donor.phone}<br>
+            🎓 <strong>Dept:</strong> ${donor.dept} · ${donor.year} Year<br>
+            🆔 <strong>Roll No:</strong> ${donor.rollNo}
+          </p>
+        </div>
+        <p style="font-size:0.8rem;color:var(--gray-400);text-align:center;margin-bottom:16px;">Please be respectful when contacting donors. This number is shared for emergency blood donation purposes only.</p>
+        <a href="tel:${donor.phone}" class="btn btn-primary btn-block btn-lg">📞 Call Donor</a>
+      `;
+      openModal('contactModal');
+    }
+
+    // Initial load
+    runSearch();
+
+    // Live search
+    document.getElementById('searchQuery').addEventListener('input', runSearch);
+    document.getElementById('filterBlood').addEventListener('change', runSearch);
+    document.getElementById('filterDept').addEventListener('change', runSearch);
+    document.getElementById('filterAvail').addEventListener('change', runSearch);
+  </script>
+</body>
+</html>
