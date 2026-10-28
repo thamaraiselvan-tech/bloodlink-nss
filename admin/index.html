@@ -586,9 +586,13 @@
   const sidebarBackdrop = document.getElementById('sidebarBackdrop');
   const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
   if (sidebarToggleBtn && sidebar && sidebarBackdrop) {
-    sidebarToggleBtn.addEventListener('click', () => {
+    sidebarToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       sidebar.classList.toggle('open');
       sidebarBackdrop.classList.toggle('open');
+    });
+    sidebar.addEventListener('click', (e) => {
+      e.stopPropagation();
     });
     sidebarBackdrop.addEventListener('click', () => {
       sidebar.classList.remove('open');

@@ -63,16 +63,40 @@ if (navbar) {
     });
   }
 
-  backdrop.addEventListener('click', closeDrawer);
+  // Prevent clicks inside drawer from propagating to backdrop
+  navLinks.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  // Tapping backdrop closes drawer
+  backdrop.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeDrawer();
+  });
+  backdrop.addEventListener('touchstart', (e) => {
+    closeDrawer();
+  }, { passive: true });
 
   const closeBtn = document.getElementById('drawerCloseBtn');
   if (closeBtn) {
-    closeBtn.addEventListener('click', closeDrawer);
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeDrawer();
+    });
   }
 
-  // Close when tapping any navigation link
-  navLinks.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', closeDrawer);
+  // Close when tapping any navigation link or action button inside drawer
+  navLinks.querySelectorAll('.nav-link, .btn').forEach(link => {
+    link.addEventListener('click', () => {
+      closeDrawer();
+    });
+  });
+
+  // Close with Esc key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && navLinks.classList.contains('open')) {
+      closeDrawer();
+    }
   });
 
   // Automatically close on resize above mobile breakpoint
