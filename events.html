@@ -75,6 +75,105 @@
     .faq-q { font-size: 0.88rem; font-weight: 700; color: var(--gray-800); margin-bottom: 6px; cursor: pointer; }
     .faq-a { font-size: 0.83rem; color: var(--gray-500); line-height: 1.6; }
 
+    /* Empty State & Camp Guide */
+    .events-empty-card {
+      background: white;
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-2xl, 24px);
+      padding: 44px 32px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+    .events-empty-icon {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      background: var(--red-50);
+      color: var(--red-600);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      border: 1px solid var(--red-100);
+    }
+    .events-empty-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+      font-family: var(--font-display);
+    }
+    .events-empty-desc {
+      font-size: 0.92rem;
+      color: var(--gray-600);
+      line-height: 1.65;
+      max-width: 500px;
+      margin: 0 auto 20px;
+    }
+    .events-empty-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .camp-guide-card {
+      background: white;
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-2xl, 24px);
+      padding: 28px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .camp-guide-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .camp-steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .camp-step-item {
+      background: var(--gray-50);
+      border-radius: var(--radius-lg);
+      padding: 16px 14px;
+      border: 1px solid var(--gray-100);
+    }
+    .camp-step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--red-600);
+      color: white;
+      font-weight: 700;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .camp-step-heading {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 4px;
+    }
+    .camp-step-text {
+      font-size: 0.78rem;
+      color: var(--gray-600);
+      line-height: 1.5;
+    }
+    @media (max-width: 768px) {
+      .camp-steps-grid { grid-template-columns: 1fr; }
+    }
+
     @media(max-width:900px) { .events-layout{grid-template-columns:1fr;} }
     @media(max-width:640px) { .event-full-meta{grid-template-columns:1fr;} .event-tags{display:none;} }
   </style>
@@ -174,7 +273,42 @@
       const all  = EventStore.getAll().sort((a,b) => new Date(a.date) - new Date(b.date));
 
       if (all.length === 0) {
-        list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📅</div><div class="empty-state-title">No events scheduled yet</div><div class="empty-state-desc">Check back soon or contact the NSS unit.</div></div>`;
+        list.innerHTML = `
+          <div class="events-empty-card">
+            <div class="events-empty-icon">📅</div>
+            <div class="events-empty-title">No Donation Camps Scheduled at the Moment</div>
+            <p class="events-empty-desc">
+              The NSS Unit organizes campus blood donation drives throughout the academic year in collaboration with government hospital blood banks. Register as a donor today to get notified as soon as the next camp date is finalized!
+            </p>
+            <div class="events-empty-actions">
+              <a href="register.html" class="btn btn-primary btn-md">Register as Donor 🩸</a>
+              <a href="contact.html" class="btn btn-outline btn-md">Contact NSS Cell 📞</a>
+            </div>
+          </div>
+
+          <div class="camp-guide-card">
+            <div class="camp-guide-title">
+              <span>🏥</span> How Our Campus Blood Camps Work
+            </div>
+            <div class="camp-steps-grid">
+              <div class="camp-step-item">
+                <div class="camp-step-num">1</div>
+                <div class="camp-step-heading">Pre-Registration</div>
+                <div class="camp-step-text">Students register online with their blood group and verify donation eligibility.</div>
+              </div>
+              <div class="camp-step-item">
+                <div class="camp-step-num">2</div>
+                <div class="camp-step-heading">On-Site Health Check</div>
+                <div class="camp-step-text">Medical officers verify hemoglobin, blood pressure, and pulse for donor safety.</div>
+              </div>
+              <div class="camp-step-item">
+                <div class="camp-step-num">3</div>
+                <div class="camp-step-heading">Donation & Certificate</div>
+                <div class="camp-step-text">Safe 10-minute donation followed by refreshments and official NSS Donor Certificate.</div>
+              </div>
+            </div>
+          </div>
+        `;
         return;
       }
 
