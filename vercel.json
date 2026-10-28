@@ -5,18 +5,30 @@
   "buildCommand": null,
   "cleanUrls": true,
   "trailingSlash": false,
-  "routes": [
+  "rewrites": [
     {
-      "src": "^/admin/?$",
-      "dest": "/admin/index.html"
+      "source": "/admin",
+      "destination": "/admin/index.html"
     },
     {
-      "handle": "filesystem"
+      "source": "/admin/",
+      "destination": "/admin/index.html"
     },
     {
-      "src": "/(.*)",
-      "status": 404,
-      "dest": "/404.html"
+      "source": "/dashboard",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/dashboard/",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/donor",
+      "destination": "/donor-portal.html"
+    },
+    {
+      "source": "/donor-portal",
+      "destination": "/donor-portal.html"
     }
   ],
   "headers": [

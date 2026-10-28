@@ -170,8 +170,12 @@
       }
       showToast(`Welcome back, ${user.name.split(' ')[0]}! 🎉`, 'success');
       setTimeout(() => {
-        if (user.role === 'admin' || user.role === 'volunteer') window.location.href = 'admin/index.html';
-        else window.location.href = 'donor-portal.html';
+        const isFile = window.location.protocol === 'file:';
+        if (user.role === 'admin' || user.role === 'volunteer') {
+          window.location.href = isFile ? 'admin/index.html' : '/admin/index.html';
+        } else {
+          window.location.href = isFile ? 'donor-portal.html' : '/donor-portal.html';
+        }
       }, 800);
     }, 500);
   });

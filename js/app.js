@@ -131,7 +131,16 @@ if (navbar) {
 
   if (user) {
     const isVolunteerOrAdmin = (user.role === 'admin' || user.role === 'volunteer');
-    const dashboardUrl = isVolunteerOrAdmin ? 'admin/index.html' : 'donor-portal.html';
+    const isFileProtocol = window.location.protocol === 'file:';
+    const isInsideAdmin = window.location.pathname.replace(/\\/g, '/').includes('/admin');
+    let dashboardUrl;
+    if (isFileProtocol) {
+      dashboardUrl = isVolunteerOrAdmin
+        ? (isInsideAdmin ? 'index.html' : 'admin/index.html')
+        : (isInsideAdmin ? '../donor-portal.html' : 'donor-portal.html');
+    } else {
+      dashboardUrl = isVolunteerOrAdmin ? '/admin/index.html' : '/donor-portal.html';
+    }
     const roleLabel = user.role === 'volunteer' 
       ? `NSS Volunteer${user.batchNo ? ' (Batch ' + user.batchNo + ')' : ''}`
       : user.role === 'admin' ? 'NSS Program Officer' : 'Registered Donor';
