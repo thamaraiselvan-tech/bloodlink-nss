@@ -48,85 +48,30 @@ const CloudSync = {
     if (!isFirebaseReady || !db || this.initialized) return;
     this.initialized = true;
 
-    // Realtime listener for Donors (Merge cloud + local)
+    // Realtime listener for Donors (Cloud is definitive source of truth)
     db.collection('donors').onSnapshot((snapshot) => {
       const cloudDonors = [];
       snapshot.forEach(doc => cloudDonors.push(doc.data()));
 
-      let localDonors = [];
-      try {
-        localDonors = JSON.parse(localStorage.getItem('bloodlink_donors') || '[]');
-      } catch (e) {}
+      // Mirror cloud directly into local cache (handles empty, additions & deletions)
+      localStorage.setItem('bloodlink_donors', JSON.stringify(cloudDonors));
 
-      const donorMap = new Map();
-      localDonors.forEach(d => { if (d && d.id) donorMap.set(String(d.id), d); });
-      cloudDonors.forEach(d => {
-        if (d && d.id) {
-          const prev = donorMap.get(String(d.id)) || {};
-          donorMap.set(String(d.id), { ...prev, ...d });
-        }
-      });
-
-      const merged = Array.from(donorMap.values());
-      if (merged.length > 0) {
-        localStorage.setItem('bloodlink_donors', JSON.stringify(merged));
-        // Auto-refresh active views if present
-        if (typeof renderDonorsTable === 'function' && typeof loadDashboard === 'function') {
-          loadDashboard();
-        } else if (typeof render === 'function' && document.getElementById('donorListBody')) {
-          render();
-        } else if (typeof runSearch === 'function' && document.getElementById('donorsResultGrid')) {
-          runSearch();
-        }
+      // Auto-refresh active views if present
+      if (typeof renderDonorsTable === 'function' && typeof loadDashboard === 'function') {
+        loadDashboard();
+      } else if (typeof render === 'function' && document.getElementById('donorListBody')) {
+        render();
+      } else if (typeof runSearch === 'function' && document.getElementById('donorsResultGrid')) {
+        runSearch();
       }
     }, (error) => console.warn('CloudSync donors listener warning:', error));
 
-    // Realtime listener for Users (Merge cloud + local)
+    // Realtime listener for Users (Cloud is definitive source of truth)
     db.collection('users').onSnapshot((snapshot) => {
       const cloudUsers = [];
       snapshot.forEach(doc => cloudUsers.push(doc.data()));
-
-      let localUsers = [];
-      try {
-        localUsers = JSON.parse(localStorage.getItem('bloodlink_users') || '[]');
-      } catch (e) {}
-
-      const userMap = new Map();
-      localUsers.forEach(u => { if (u && u.id) userMap.set(String(u.id), u); });
-      cloudUsers.forEach(u => {
-        if (u && u.id) {
-          const prev = userMap.get(String(u.id)) || {};
-          userMap.set(String(u.id), { ...prev, ...u });
-        }
-      });
-
-      const mergedUsers = Array.from(userMap.values());
-      if (mergedUsers.length > 0) {
-        localStorage.setItem('bloodlink_users', JSON.stringify(mergedUsers));
-      }
+      localStorage.setItem('bloodlink_users', JSON.stringify(cloudUsers));
     }, (error) => console.warn('CloudSync users listener warning:', error));
-
-    // Auto-sync any existing local registrations to Cloud Firestore
-    try {
-      const localDonors = JSON.parse(localStorage.getItem('bloodlink_donors') || '[]');
-      if (Array.isArray(localDonors) && localDonors.length > 0) {
-        localDonors.forEach(d => {
-          if (d && d.id) {
-            db.collection('donors').doc(String(d.id)).set(d, { merge: true });
-          }
-        });
-      }
-      const localUsers = JSON.parse(localStorage.getItem('bloodlink_users') || '[]');
-      if (Array.isArray(localUsers) && localUsers.length > 0) {
-        localUsers.forEach(u => {
-          if (u && u.id && u.role === 'donor') {
-            db.collection('users').doc(String(u.id)).set(u, { merge: true });
-          }
-        });
-      }
-    } catch (syncErr) {
-      console.warn('Initial cloud upload sync notice:', syncErr);
-    }
 
     // Realtime listener for Recent Activities
     db.collection('activities').orderBy('timestamp', 'desc').limit(30).onSnapshot((snapshot) => {

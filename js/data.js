@@ -2,6 +2,13 @@
 // BloodLink NSS Portal — Shared Data Store & Authentic NSS Volunteer Credentials
 // ================================================================
 
+// Clean reset for testing data: starts donors completely empty
+if (!localStorage.getItem('bloodlink_clean_v2')) {
+  localStorage.setItem('bloodlink_donors', '[]');
+  localStorage.removeItem('bloodlink_user');
+  localStorage.setItem('bloodlink_clean_v2', 'true');
+}
+
 // ── Official NSS Volunteers List ──────────────────────────────────
 // Batch number acts as both Username & Password for volunteer portal login
 const NSS_VOLUNTEERS = [
