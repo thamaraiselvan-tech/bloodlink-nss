@@ -106,8 +106,8 @@
 <!-- Toast container -->
 <div class="toast-container"></div>
 
-<script src="js/data.js"></script>
-<script src="js/app.js"></script>
+<script src="js/data.js?v=2"></script>
+<script src="js/app.js?v=2"></script>
 <script>
 
 
@@ -185,18 +185,35 @@
         // Friendly diagnosis for failed login:
         const idClean = identifier.toLowerCase();
         const idDigits = idClean.replace(/\D/g, '');
-        const matchingDonor = DonorStore.getAll().find(d => 
-          (d.email && d.email.toLowerCase() === idClean) ||
-          (d.rollNo && d.rollNo.toLowerCase() === idClean) ||
-          (d.phone && idDigits && d.phone.replace(/\D/g, '').endsWith(idDigits) && idDigits.length >= 10)
-        );
-        const userExists = UserStore.getAll().some(u => 
-          (u.email && u.email.toLowerCase() === idClean) ||
-          (u.username && u.username.toLowerCase() === idClean) ||
-          (u.batchNo && u.batchNo.toLowerCase() === idClean) ||
-          (u.rollNo && u.rollNo.toLowerCase() === idClean) ||
-          (u.phone && idDigits && u.phone.replace(/\D/g, '').endsWith(idDigits) && idDigits.length >= 10)
-        );
+        const allDonors = (typeof DonorStore !== 'undefined') ? DonorStore.getAll() : [];
+        const matchingDonor = allDonors.find(d => {
+          if (!d) return false;
+          const dEmail = (d.email || '').toString().toLowerCase();
+          const dRoll = (d.rollNo || '').toString().toLowerCase();
+          const dPhoneDigits = (d.phone || '').toString().replace(/\D/g, '');
+          return (
+            (dEmail && dEmail === idClean) ||
+            (dRoll && dRoll === idClean) ||
+            (dPhoneDigits && idDigits && dPhoneDigits.endsWith(idDigits) && idDigits.length >= 10)
+          );
+        });
+
+        const allUsers = (typeof UserStore !== 'undefined') ? UserStore.getAll() : [];
+        const userExists = allUsers.some(u => {
+          if (!u) return false;
+          const uEmail = (u.email || '').toString().toLowerCase();
+          const uUsername = (u.username || '').toString().toLowerCase();
+          const uBatch = (u.batchNo || '').toString().toLowerCase();
+          const uRoll = (u.rollNo || '').toString().toLowerCase();
+          const uPhoneDigits = (u.phone || '').toString().replace(/\D/g, '');
+          return (
+            (uEmail && uEmail === idClean) ||
+            (uUsername && uUsername === idClean) ||
+            (uBatch && uBatch === idClean) ||
+            (uRoll && uRoll === idClean) ||
+            (uPhoneDigits && idDigits && uPhoneDigits.endsWith(idDigits) && idDigits.length >= 10)
+          );
+        });
 
         if (matchingDonor && !userExists) {
           showFieldError('loginPassword', `Donor profile found for ${matchingDonor.name}, but login password was not set in earlier version. Please re-register once on the registration page to set your password.`);
