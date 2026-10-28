@@ -3,11 +3,13 @@
 // ================================================================
 
 // Clean reset: purge stale test donor users and sessions from browser localStorage
-if (!localStorage.getItem('bloodlink_clean_v3')) {
-  localStorage.setItem('bloodlink_donors', '[]');
-  localStorage.removeItem('bloodlink_users');
-  localStorage.removeItem('bloodlink_user');
-  localStorage.setItem('bloodlink_clean_v3', 'true');
+if (typeof localStorage !== 'undefined') {
+  if (!localStorage.getItem('bloodlink_clean_v3')) {
+    localStorage.setItem('bloodlink_donors', '[]');
+    localStorage.removeItem('bloodlink_users');
+    localStorage.removeItem('bloodlink_user');
+    localStorage.setItem('bloodlink_clean_v3', 'true');
+  }
 }
 
 // ── Official NSS Volunteers List ──────────────────────────────────
@@ -376,13 +378,15 @@ const Auth = {
   },
 
   loadSession() {
-    const stored = localStorage.getItem('bloodlink_user');
+    const stored = (typeof localStorage !== 'undefined') ? localStorage.getItem('bloodlink_user') : null;
     if (stored) {
       try {
         this.currentUser = JSON.parse(stored);
       } catch (e) {
         this.currentUser = null;
       }
+    } else {
+      this.currentUser = null;
     }
     return this.currentUser;
   },

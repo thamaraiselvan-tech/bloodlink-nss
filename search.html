@@ -229,8 +229,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase-config.js"></script>
-  <script src="js/data.js?v=4"></script>
-  <script src="js/app.js?v=4"></script>
+  <script src="js/data.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
   <script>
     // Pre-fill blood group from URL param
     const urlParams = new URLSearchParams(window.location.search);
@@ -303,7 +303,7 @@
           </div>
           <div class="donor-card-footer">
             ${d.available
-              ? `<button class="btn btn-primary btn-sm" style="flex:1" onclick="openContact(${d.id})">📞 Contact</button>`
+              ? `<button class="btn btn-primary btn-sm" style="flex:1" onclick="openContact(${d.id})">${(typeof Auth !== 'undefined' && Auth.isVolunteer()) ? '📞 Call' : '🔒 Contact'}</button>`
               : `<button class="btn btn-outline btn-sm" style="flex:1;opacity:0.5;" disabled>Not Available</button>`}
             <button class="btn btn-outline btn-sm" onclick="showToast('Emergency request sent to NSS team! 🚨', 'info')">🚨 Urgent</button>
           </div>
@@ -312,23 +312,64 @@
     }
 
     function openContact(donorId) {
-      const donor = DonorStore.getAll().find(d => d.id === donorId);
+      const donor = DonorStore.getAll().find(d => String(d.id) === String(donorId));
       if (!donor) return;
+
+      const user = (typeof Auth !== 'undefined' && Auth.loadSession) ? Auth.loadSession() : null;
+      const canViewContact = (typeof Auth !== 'undefined' && Auth.isVolunteer) ? Auth.isVolunteer() : false;
+
+      let contactBodyHtml = '';
+      if (canViewContact) {
+        contactBodyHtml = `
+          <div style="background:var(--gray-50);border-radius:var(--radius);padding:16px;margin-bottom:16px;">
+            <p style="font-size:0.88rem;color:var(--gray-600);line-height:1.8;margin:0;">
+              📱 <strong>Phone:</strong> <a href="tel:${donor.phone}" style="color:var(--red-600);font-weight:700;">${donor.phone}</a><br>
+              🎓 <strong>Dept:</strong> ${donor.dept || ''} · ${donor.year || ''} Year<br>
+              🆔 <strong>Roll No:</strong> ${donor.rollNo || ''}
+            </p>
+          </div>
+          <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;text-align:left;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:1.15rem;">🎽</span>
+            <div style="font-size:0.78rem;color:#065f46;font-weight:600;">
+              Authorized NSS View &mdash; Logged in as ${user?.role === 'admin' ? 'Program Officer' : 'Volunteer'} (${user?.name || ''})
+            </div>
+          </div>
+          <p style="font-size:0.8rem;color:var(--gray-400);text-align:center;margin-bottom:16px;">Please be respectful when contacting donors. This number is shared for emergency blood donation purposes only.</p>
+          <a href="tel:${donor.phone}" class="btn btn-primary btn-block btn-lg">📞 Call Donor Now</a>
+        `;
+      } else {
+        const rawPhone = String(donor.phone || '').replace(/\D/g, '');
+        const phoneMasked = rawPhone ? '•••••• ' + rawPhone.slice(-4) : '••••••••••';
+        contactBodyHtml = `
+          <div style="background:var(--gray-50);border-radius:var(--radius);padding:16px;margin-bottom:16px;">
+            <p style="font-size:0.88rem;color:var(--gray-600);line-height:1.8;margin:0;">
+              📱 <strong>Phone:</strong> <span style="font-family:monospace;font-weight:700;letter-spacing:1px;">${phoneMasked}</span> <span style="background:#fee2e2;color:#991b1b;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:6px;">🔒 Protected</span><br>
+              🎓 <strong>Dept:</strong> ${donor.dept || ''} · ${donor.year || ''} Year<br>
+              🆔 <strong>Roll No:</strong> ${donor.rollNo || ''}
+            </p>
+          </div>
+          <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;text-align:left;">
+            <div style="font-weight:700;color:#92400e;font-size:0.84rem;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+              <span>🛡️ Student Privacy Protection</span>
+            </div>
+            <p style="font-size:0.78rem;color:#78350f;line-height:1.45;margin:0;">
+              Donor phone numbers are strictly confidential to protect student privacy. Direct numbers are accessible only to authorized <strong>NSS Volunteers</strong> &amp; the <strong>Program Officer</strong>.
+            </p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <a href="contact.html" class="btn btn-primary btn-block btn-lg">🚨 Request Blood via NSS Unit</a>
+            ${!user ? `<a href="login.html" class="btn btn-outline btn-block" style="font-size:0.85rem;">🎽 Volunteer / Officer Login</a>` : ''}
+          </div>
+        `;
+      }
+
       document.getElementById('contactModalBody').innerHTML = `
         <div style="text-align:center;margin-bottom:24px;">
           <div style="width:72px;height:72px;border-radius:50%;background:var(--red-600);color:white;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;margin:0 auto 12px;">${donor.name.charAt(0)}</div>
           <h3 style="font-size:1.2rem;font-weight:700;color:var(--gray-900);">${donor.name}</h3>
           <div style="display:inline-block;background:var(--red-50);color:var(--red-700);border:1px solid var(--red-100);padding:4px 14px;border-radius:999px;font-family:var(--font-display);font-size:1.1rem;font-weight:800;margin-top:6px;">${donor.blood}</div>
         </div>
-        <div style="background:var(--gray-50);border-radius:var(--radius);padding:16px;margin-bottom:20px;">
-          <p style="font-size:0.88rem;color:var(--gray-600);line-height:1.8;">
-            📱 <strong>Phone:</strong> ${donor.phone}<br>
-            🎓 <strong>Dept:</strong> ${donor.dept} · ${donor.year} Year<br>
-            🆔 <strong>Roll No:</strong> ${donor.rollNo}
-          </p>
-        </div>
-        <p style="font-size:0.8rem;color:var(--gray-400);text-align:center;margin-bottom:16px;">Please be respectful when contacting donors. This number is shared for emergency blood donation purposes only.</p>
-        <a href="tel:${donor.phone}" class="btn btn-primary btn-block btn-lg">📞 Call Donor</a>
+        ${contactBodyHtml}
       `;
       openModal('contactModal');
     }
