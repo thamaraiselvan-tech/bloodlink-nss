@@ -2,15 +2,6 @@
 // BloodLink NSS Portal — Shared Data Store & Authentic NSS Volunteer Credentials
 // ================================================================
 
-// Automatically reset/purge old cached sample data when upgrading data version
-if (!localStorage.getItem('bloodlink_data_v4')) {
-  localStorage.removeItem('bloodlink_donors');
-  localStorage.removeItem('bloodlink_events');
-  localStorage.removeItem('bloodlink_activities');
-  localStorage.removeItem('bloodlink_user');
-  localStorage.setItem('bloodlink_data_v4', 'true');
-}
-
 // ── Official NSS Volunteers List ──────────────────────────────────
 // Batch number acts as both Username & Password for volunteer portal login
 const NSS_VOLUNTEERS = [
@@ -282,18 +273,62 @@ const Auth = {
   login(identifier, password) {
     const idClean = (identifier || '').toString().trim().toLowerCase();
     const idCleanDigits = idClean.replace(/\D/g, '');
+    const embeddedRoll = (idClean.match(/\d{5,8}/)?.[0]) || '';
     const passClean = (password || '').toString();
 
     // Match by batchNo, username, email, phone, or rollNo
-    const user = UserStore.getAll().find(u => {
+    let user = UserStore.getAll().find(u => {
       const matchBatch    = (u.batchNo || '').toString().toLowerCase() === idClean;
       const matchUsername = (u.username || '').toString().toLowerCase() === idClean;
       const matchEmail    = (u.email || '').toString().toLowerCase() === idClean;
       const uPhoneDigits  = (u.phone || '').toString().replace(/\D/g, '');
       const matchPhone    = (uPhoneDigits && idCleanDigits && uPhoneDigits.endsWith(idCleanDigits) && idCleanDigits.length >= 10);
-      const matchRoll     = (u.rollNo || '').toString().toLowerCase() === idClean;
+      const matchRoll     = (u.rollNo || '').toString().toLowerCase() === idClean || (embeddedRoll && (u.rollNo || '').toString().toLowerCase() === embeddedRoll);
       return (matchBatch || matchUsername || matchEmail || matchPhone || matchRoll) && u.password === passClean;
     });
+
+    // Auto-recover/activate donor account if donor profile exists
+    if (!user && typeof DonorStore !== 'undefined') {
+      const allDonors = DonorStore.getAll();
+      const matchingDonor = allDonors.find(d => {
+        if (!d) return false;
+        const dEmail = (d.email || '').toString().toLowerCase();
+        const dRoll  = (d.rollNo || '').toString().toLowerCase();
+        const dPhone = (d.phone || '').toString().replace(/\D/g, '');
+        return (
+          (dEmail && dEmail === idClean) ||
+          (dRoll && (dRoll === idClean || (embeddedRoll && dRoll === embeddedRoll))) ||
+          (dPhone && idCleanDigits && dPhone.endsWith(idCleanDigits) && idCleanDigits.length >= 10)
+        );
+      });
+
+      if (matchingDonor) {
+        const existingAcc = UserStore.getAll().find(u => u.donorId == matchingDonor.id || (u.rollNo && (u.rollNo || '').toString().toLowerCase() === (matchingDonor.rollNo || '').toString().toLowerCase()));
+        if (existingAcc) {
+          if (existingAcc.password === passClean) {
+            user = existingAcc;
+          }
+        } else if (passClean.length >= 4) {
+          // Initialize credentials for existing donor
+          user = {
+            id: 'donor_' + matchingDonor.id,
+            name: matchingDonor.name,
+            username: idClean,
+            email: matchingDonor.email || idClean,
+            phone: matchingDonor.phone,
+            rollNo: matchingDonor.rollNo,
+            password: passClean,
+            role: 'donor',
+            donorId: matchingDonor.id,
+            dept: matchingDonor.dept,
+            deptCode: matchingDonor.dept,
+            blood: matchingDonor.blood,
+            year: matchingDonor.year
+          };
+          UserStore.add(user);
+        }
+      }
+    }
 
     if (user) {
       this.currentUser = user;
@@ -307,6 +342,7 @@ const Auth = {
     if (typeof isFirebaseReady === 'undefined' || !isFirebaseReady || typeof db === 'undefined' || !db) return null;
     const idClean = (identifier || '').toString().trim().toLowerCase();
     const idCleanDigits = idClean.replace(/\D/g, '');
+    const embeddedRoll = (idClean.match(/\d{5,8}/)?.[0]) || '';
     const passClean = (password || '').toString();
 
     try {
@@ -321,14 +357,62 @@ const Auth = {
         const matchEmail    = (u.email || '').toString().toLowerCase() === idClean;
         const uPhoneDigits  = (u.phone || '').toString().replace(/\D/g, '');
         const matchPhone    = (uPhoneDigits && idCleanDigits && uPhoneDigits.endsWith(idCleanDigits) && idCleanDigits.length >= 10);
-        const matchRoll     = (u.rollNo || '').toString().toLowerCase() === idClean;
+        const matchRoll     = (u.rollNo || '').toString().toLowerCase() === idClean || (embeddedRoll && (u.rollNo || '').toString().toLowerCase() === embeddedRoll);
         if ((matchBatch || matchUsername || matchEmail || matchPhone || matchRoll) && u.password === passClean) {
           matchedUser = u;
         }
       });
+
       if (cloudUsers.length > 0) {
-        localStorage.setItem('bloodlink_users', JSON.stringify(cloudUsers));
+        // Merge cloud users with local custom users
+        let localCustoms = [];
+        try { localCustoms = JSON.parse(localStorage.getItem('bloodlink_users') || '[]'); } catch (e) {}
+        const map = new Map();
+        localCustoms.forEach(u => { if (u && u.id) map.set(String(u.id), u); });
+        cloudUsers.forEach(u => { if (u && u.id) map.set(String(u.id), u); });
+        localStorage.setItem('bloodlink_users', JSON.stringify(Array.from(map.values())));
       }
+
+      // If user not in cloud 'users', check cloud 'donors'
+      if (!matchedUser) {
+        const donorSnap = await db.collection('donors').get();
+        let cloudDonor = null;
+        donorSnap.forEach(doc => {
+          const d = doc.data();
+          const dEmail = (d.email || '').toString().toLowerCase();
+          const dRoll  = (d.rollNo || '').toString().toLowerCase();
+          const dPhone = (d.phone || '').toString().replace(/\D/g, '');
+          if (
+            (dEmail && dEmail === idClean) ||
+            (dRoll && (dRoll === idClean || (embeddedRoll && dRoll === embeddedRoll))) ||
+            (dPhone && idCleanDigits && dPhone.endsWith(idCleanDigits) && idCleanDigits.length >= 10)
+          ) {
+            cloudDonor = d;
+          }
+        });
+
+        if (cloudDonor && passClean.length >= 4) {
+          const newCloudUser = {
+            id: 'donor_' + (cloudDonor.id || Date.now()),
+            name: cloudDonor.name,
+            username: idClean,
+            email: cloudDonor.email || idClean,
+            phone: cloudDonor.phone,
+            rollNo: cloudDonor.rollNo,
+            password: passClean,
+            role: 'donor',
+            donorId: cloudDonor.id,
+            dept: cloudDonor.dept,
+            deptCode: cloudDonor.dept,
+            blood: cloudDonor.blood,
+            year: cloudDonor.year
+          };
+          await db.collection('users').doc(String(newCloudUser.id)).set(newCloudUser, { merge: true });
+          UserStore.add(newCloudUser);
+          matchedUser = newCloudUser;
+        }
+      }
+
       if (matchedUser) {
         this.currentUser = matchedUser;
         localStorage.setItem('bloodlink_user', JSON.stringify(matchedUser));

@@ -48,12 +48,28 @@ const CloudSync = {
     if (!isFirebaseReady || !db || this.initialized) return;
     this.initialized = true;
 
-    // Realtime listener for Donors
+    // Realtime listener for Donors (Merge cloud + local)
     db.collection('donors').onSnapshot((snapshot) => {
-      const donors = [];
-      snapshot.forEach(doc => donors.push(doc.data()));
-      if (donors.length > 0 || snapshot.metadata.hasPendingWrites) {
-        localStorage.setItem('bloodlink_donors', JSON.stringify(donors));
+      const cloudDonors = [];
+      snapshot.forEach(doc => cloudDonors.push(doc.data()));
+
+      let localDonors = [];
+      try {
+        localDonors = JSON.parse(localStorage.getItem('bloodlink_donors') || '[]');
+      } catch (e) {}
+
+      const donorMap = new Map();
+      localDonors.forEach(d => { if (d && d.id) donorMap.set(String(d.id), d); });
+      cloudDonors.forEach(d => {
+        if (d && d.id) {
+          const prev = donorMap.get(String(d.id)) || {};
+          donorMap.set(String(d.id), { ...prev, ...d });
+        }
+      });
+
+      const merged = Array.from(donorMap.values());
+      if (merged.length > 0) {
+        localStorage.setItem('bloodlink_donors', JSON.stringify(merged));
         // Auto-refresh active views if present
         if (typeof renderDonorsTable === 'function' && typeof loadDashboard === 'function') {
           loadDashboard();
@@ -65,12 +81,28 @@ const CloudSync = {
       }
     }, (error) => console.warn('CloudSync donors listener warning:', error));
 
-    // Realtime listener for Users (authentication accounts)
+    // Realtime listener for Users (Merge cloud + local)
     db.collection('users').onSnapshot((snapshot) => {
-      const users = [];
-      snapshot.forEach(doc => users.push(doc.data()));
-      if (users.length > 0) {
-        localStorage.setItem('bloodlink_users', JSON.stringify(users));
+      const cloudUsers = [];
+      snapshot.forEach(doc => cloudUsers.push(doc.data()));
+
+      let localUsers = [];
+      try {
+        localUsers = JSON.parse(localStorage.getItem('bloodlink_users') || '[]');
+      } catch (e) {}
+
+      const userMap = new Map();
+      localUsers.forEach(u => { if (u && u.id) userMap.set(String(u.id), u); });
+      cloudUsers.forEach(u => {
+        if (u && u.id) {
+          const prev = userMap.get(String(u.id)) || {};
+          userMap.set(String(u.id), { ...prev, ...u });
+        }
+      });
+
+      const mergedUsers = Array.from(userMap.values());
+      if (mergedUsers.length > 0) {
+        localStorage.setItem('bloodlink_users', JSON.stringify(mergedUsers));
       }
     }, (error) => console.warn('CloudSync users listener warning:', error));
 
