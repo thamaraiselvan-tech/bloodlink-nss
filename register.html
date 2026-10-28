@@ -333,7 +333,7 @@
 
     try {
       // Step 3 validations
-      const email = (document.getElementById('regEmail')?.value || '').trim();
+      const email = (document.getElementById('regEmail')?.value || '').trim().toLowerCase();
       const pass  = document.getElementById('regPassword')?.value || '';
       const conf  = document.getElementById('regConfirm')?.value || '';
       const terms = document.getElementById('termsCheck')?.checked;
@@ -366,7 +366,7 @@
       const deptCode  = (deptVal.match(/\((\w+)\)/)?.[1]) || deptVal || 'General';
       const year      = document.getElementById('year')?.value || '1st';
       const blood     = document.querySelector('input[name="bloodGroup"]:checked')?.value || 'Unknown';
-      const phone     = (document.getElementById('phone')?.value || '').trim();
+      const phone     = (document.getElementById('phone')?.value || '').replace(/\D/g, '').trim();
       const dob       = document.getElementById('dob')?.value || '';
       const weight    = document.getElementById('weight')?.value || '';
       const lastDon   = document.getElementById('lastDonated')?.value || null;
