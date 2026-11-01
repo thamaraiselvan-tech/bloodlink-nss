@@ -10,8 +10,8 @@
   <title>Admin Dashboard — BloodLink NSS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css?v=11">
-  <link rel="stylesheet" href="../css/dashboard.css?v=11">
+  <link rel="stylesheet" href="../css/style.css?v=12">
+  <link rel="stylesheet" href="../css/dashboard.css?v=12">
   <style>
     .quick-actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 28px; }
     .quick-action-btn {
@@ -388,9 +388,9 @@
 <!-- Firebase Cloud Database SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<script src="../js/firebase-config.js?v=11"></script>
-<script src="../js/data.js?v=11"></script>
-<script src="../js/app.js?v=11"></script>
+<script src="../js/firebase-config.js?v=12"></script>
+<script src="../js/data.js?v=12"></script>
+<script src="../js/app.js?v=12"></script>
 <script>
   // Auth guard
   const user = Auth.loadSession();
@@ -501,13 +501,18 @@
           <span style="font-size:0.82rem;color:var(--gray-500);">Activity logs will appear automatically as donors register, donations are marked, and camps are organized.</span>
         </div>`;
     } else {
-      actList.innerHTML = activities.map(a => `
-        <div class="activity-item">
-          <div class="activity-icon ${a.type}">${a.icon}</div>
-          <div class="activity-text"><strong>${a.title}</strong><span>${a.desc}</span></div>
-          <div class="activity-time">${a.time}</div>
-        </div>
-      `).join('');
+      actList.innerHTML = activities.map(a => {
+        const rawTs = a.timestamp || a.id || (a.createdAt ? new Date(a.createdAt).getTime() : null);
+        const displayTime = formatTimeAgo(rawTs, a.time);
+        const fullDate = rawTs ? new Date(rawTs).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : (a.time || 'Recent');
+        return `
+          <div class="activity-item">
+            <div class="activity-icon ${a.type}">${a.icon}</div>
+            <div class="activity-text"><strong>${a.title}</strong><span>${a.desc}</span></div>
+            <div class="activity-time" title="${fullDate}">${displayTime}</div>
+          </div>
+        `;
+      }).join('');
     }
   }
 
@@ -604,7 +609,32 @@
     }
   }
 
-    function formatUrgencyBadge(urgencyRaw) {
+    
+function formatTimeAgo(timestamp, fallback) {
+  if (!timestamp) return fallback || 'Just now';
+  const ts = (typeof timestamp === 'string' && isNaN(timestamp))
+    ? new Date(timestamp).getTime()
+    : Number(timestamp);
+
+  if (!ts || isNaN(ts)) return fallback || 'Just now';
+
+  const diffMs = Date.now() - ts;
+  if (diffMs < 0 || diffMs < 45 * 1000) return 'Just now';
+
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 60) return `${mins}m ago`;
+
+  const hours = Math.floor(diffMs / 3600000);
+  if (hours < 24) return `${hours}h ago`;
+
+  const days = Math.floor(diffMs / 86400000);
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return `${days}d ago`;
+
+  return new Date(ts).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+}
+
+  function formatUrgencyBadge(urgencyRaw) {
     const u = (urgencyRaw || '').toLowerCase();
     if (u.includes('24') || u.includes('emergency')) {
       return '<span class="req-urgency-tag emergency">⚡ Emergency (24h)</span>';
@@ -742,6 +772,9 @@
     showToast(`Request marked as ${newStatus}!`, 'success');
     renderBloodRequests();
     loadDashboard();
+
+
+
   }
 
   function deleteBloodRequest(id) {
@@ -750,6 +783,9 @@
     showToast('Blood request deleted.', 'info');
     renderBloodRequests();
     loadDashboard();
+
+
+
   }
 
 
@@ -777,6 +813,9 @@
       }
       closeModal('deleteModal');
       loadDashboard();
+
+
+
       showToast('Donor removed successfully.', 'success');
       deleteTargetId = null;
     }
@@ -787,6 +826,9 @@
     if (donor) {
       DonorStore.update(id, { available: !donor.available });
       loadDashboard();
+
+
+
       showToast(`${donor.name} marked as ${donor.available ? 'Unavailable' : 'Available'}.`, 'info');
     }
   }
@@ -810,6 +852,27 @@
   });
 
   loadDashboard();
+
+
+
+  
+  // Automatically refresh activity relative timings every 30 seconds
+  setInterval(() => {
+    const actList = document.getElementById('activityList');
+    if (!actList) return;
+    const activities = ActivityStore.getAll();
+    if (activities.length > 0) {
+      const items = actList.querySelectorAll('.activity-item');
+      activities.slice(0, items.length).forEach((a, idx) => {
+        const timeEl = items[idx]?.querySelector('.activity-time');
+        if (timeEl) {
+          const rawTs = a.timestamp || a.id || (a.createdAt ? new Date(a.createdAt).getTime() : null);
+          timeEl.textContent = formatTimeAgo(rawTs, a.time);
+        }
+      });
+    }
+  }, 30000);
+
   // Mobile sidebar drawer
   const sidebar = document.getElementById('sidebar');
   const sidebarBackdrop = document.getElementById('sidebarBackdrop');

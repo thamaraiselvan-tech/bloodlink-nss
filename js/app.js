@@ -244,6 +244,31 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 });
 
 // ── Format date helper ────────────────────────────────────────────
+
+function formatTimeAgo(timestamp, fallback) {
+  if (!timestamp) return fallback || 'Just now';
+  const ts = (typeof timestamp === 'string' && isNaN(timestamp))
+    ? new Date(timestamp).getTime()
+    : Number(timestamp);
+
+  if (!ts || isNaN(ts)) return fallback || 'Just now';
+
+  const diffMs = Date.now() - ts;
+  if (diffMs < 0 || diffMs < 45 * 1000) return 'Just now';
+
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 60) return `${mins}m ago`;
+
+  const hours = Math.floor(diffMs / 3600000);
+  if (hours < 24) return `${hours}h ago`;
+
+  const days = Math.floor(diffMs / 86400000);
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return `${days}d ago`;
+
+  return new Date(ts).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+}
+
 function formatDate(dateStr) {
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });

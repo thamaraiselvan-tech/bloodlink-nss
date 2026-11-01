@@ -494,14 +494,16 @@ const ActivityStore = {
   },
   add(item) {
     const activities = this.getAll();
+    const now = Date.now();
     const newActivity = {
-      id: Date.now(),
+      id: now,
       type: item.type || 'register',
-      icon: item.icon || '📋',
+      icon: item.icon || '🩸',
       title: item.title,
       desc: item.desc,
-      time: item.time || 'Just now',
-      timestamp: Date.now()
+      time: 'Just now',
+      timestamp: now,
+      createdAt: new Date().toISOString()
     };
     activities.unshift(newActivity);
     this.save(activities.slice(0, 30));
