@@ -514,10 +514,10 @@ const ActivityStore = {
   }
 };
 
-// NSS Emergency Coordinator Phone (for direct WhatsApp / call dispatch)
-// Currently set to testing number (8428705251); can be replaced with PO number (9445613698)
-const NSS_EMERGENCY_PHONE = '8428705251';
-const NSS_PO_PHONE = '9445613698';
+// NSS Emergency Coordination Helplines (Dual Dispatch: Programme Officer + Student Coordinator)
+const NSS_PO_PHONE = '9445613698';           // Programme Officer (Sir)
+const NSS_COORDINATOR_PHONE = '8428705251';  // Student Coordinator
+const NSS_EMERGENCY_PHONE = '8428705251';    // Kept for legacy compatibility
 
 // ── Blood & Emergency Requests Store (localStorage + Cloud Firestore) ──
 const RequestStore = {
