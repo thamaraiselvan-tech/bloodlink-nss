@@ -10,7 +10,7 @@
   <title>Contact Us — BloodLink NSS Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=12">
+  <link rel="stylesheet" href="css/style.css?v=13">
   <style>
     .contact-section { padding: 80px 0 100px; }
     .contact-layout { display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; align-items: start; }
@@ -249,9 +249,9 @@
   <!-- Firebase Cloud Database SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=12"></script>
-  <script src="js/data.js?v=12"></script>
-  <script src="js/app.js?v=12"></script>
+  <script src="js/firebase-config.js?v=13"></script>
+  <script src="js/data.js?v=13"></script>
+  <script src="js/app.js?v=13"></script>
   <script>
     // Toggle blood-specific fields
     document.querySelectorAll('input[name="reqType"]').forEach(radio => {
@@ -345,26 +345,37 @@
       const TARGET_PHONE = (typeof NSS_EMERGENCY_PHONE !== 'undefined') ? NSS_EMERGENCY_PHONE : '8428705251';
       const waNumber = '91' + TARGET_PHONE.replace(/\D/g, '');
 
+      const rawDigits = (phone || '').replace(/\D/g, '');
+      const displayPhone = rawDigits.length === 10 ? `+91 ${rawDigits.slice(0, 5)} ${rawDigits.slice(5)}` : (phone || 'N/A');
+      const dateStr = new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+
       let waText = '';
       if (type === 'blood') {
-        waText = `🚨 *URGENT BLOOD REQUEST — NSS BLOODLINK*\n\n` +
-          `👤 *Requester Name:* ${name}\n` +
-          `📞 *Contact Number:* ${phone}\n` +
-          (email ? `✉️ *Email:* ${email}\n` : '') +
-          `🩸 *Blood Group Needed:* ${bloodGroup}\n` +
-          `💉 *Units Required:* ${units} Unit(s)\n` +
-          `🏥 *Hospital / Location:* ${hospital || 'Not specified'}\n` +
-          `⚡ *Urgency Level:* ${urgency}\n` +
-          `📝 *Message / Patient Situation:*\n"${msg}"\n\n` +
-          `📍 *Submitted on:* ${new Date().toLocaleString('en-IN')}\n` +
-          `_Portal: BloodLink NSS Unit_`;
+        waText =
+          `*URGENT BLOOD REQUEST — NSS BLOODLINK*\n` +
+          `----------------------------------------\n` +
+          `• *Requester:* ${name}\n` +
+          `• *Contact Number:* ${displayPhone}\n` +
+          (email ? `• *Email:* ${email}\n` : '') +
+          `• *Blood Group Needed:* *${bloodGroup}*\n` +
+          `• *Units Required:* ${units} Unit(s)\n` +
+          `• *Hospital / Location:* ${hospital || 'Not specified'}\n` +
+          `• *Urgency Level:* ${urgency}\n` +
+          `\n• *Patient Situation / Note:*\n"${msg}"\n` +
+          `----------------------------------------\n` +
+          `• *Submitted on:* ${dateStr}\n` +
+          `• *Portal:* BloodLink NSS Unit`;
       } else {
-        waText = `📩 *NEW INQUIRY (${type.toUpperCase()}) — NSS BLOODLINK*\n\n` +
-          `👤 *From:* ${name}\n` +
-          `📞 *Contact:* ${phone}\n` +
-          (email ? `✉️ *Email:* ${email}\n` : '') +
-          `📝 *Message:*\n"${msg}"\n\n` +
-          `📍 *Submitted on:* ${new Date().toLocaleString('en-IN')}`;
+        waText =
+          `*NEW INQUIRY (${type.toUpperCase()}) — NSS BLOODLINK*\n` +
+          `----------------------------------------\n` +
+          `• *From:* ${name}\n` +
+          `• *Contact:* ${displayPhone}\n` +
+          (email ? `• *Email:* ${email}\n` : '') +
+          `\n• *Message:*\n"${msg}"\n` +
+          `----------------------------------------\n` +
+          `• *Submitted on:* ${dateStr}\n` +
+          `• *Portal:* BloodLink NSS Unit`;
       }
 
       const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(waText)}`;
