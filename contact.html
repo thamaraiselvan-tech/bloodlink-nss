@@ -10,7 +10,7 @@
   <title>Contact Us — BloodLink NSS Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=14">
+  <link rel="stylesheet" href="css/style.css?v=15">
   <style>
     .contact-section { padding: 80px 0 100px; }
     .contact-layout { display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; align-items: start; }
@@ -122,33 +122,6 @@
               <li><span>ℹ️</span> Official campus office directory and faculty helpline contacts will be updated shortly.</li>
             </ul>
           </div>
-
-          <div style="margin-top:22px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);border-radius:var(--radius-lg);padding:16px 18px;">
-            <div style="font-size:0.8rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.95);margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-              <span>🚨</span> Direct Emergency Helplines
-            </div>
-            <div style="display:flex;flex-direction:column;gap:10px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.18);padding:10px 14px;border-radius:var(--radius);border:1px solid rgba(255,255,255,0.1);">
-                <div>
-                  <div style="font-size:0.75rem;opacity:0.8;font-weight:600;text-transform:uppercase;">NSS Programme Officer (Sir)</div>
-                  <div style="font-size:0.95rem;font-weight:700;color:white;">+91 94456 13698</div>
-                </div>
-                <div style="display:flex;gap:8px;">
-                  <a href="tel:9445613698" style="background:white;color:var(--red-800);padding:6px 10px;border-radius:6px;font-size:0.78rem;font-weight:700;text-decoration:none;" title="Call PO">📞 Call</a>
-                  <a href="https://wa.me/919445613698" target="_blank" style="background:#25D366;color:white;padding:6px 10px;border-radius:6px;font-size:0.78rem;font-weight:700;text-decoration:none;" title="WhatsApp PO">💬</a>
-                </div>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.18);padding:10px 14px;border-radius:var(--radius);border:1px solid rgba(255,255,255,0.1);">
-                <div>
-                  <div style="font-size:0.75rem;opacity:0.8;font-weight:600;text-transform:uppercase;">Student Coordinator</div>
-                  <div style="font-size:0.95rem;font-weight:700;color:white;">+91 84287 05251</div>
-                </div>
-                <div style="display:flex;gap:8px;">
-                  <a href="tel:8428705251" style="background:white;color:var(--red-800);padding:6px 10px;border-radius:6px;font-size:0.78rem;font-weight:700;text-decoration:none;" title="Call Coordinator">📞 Call</a>
-                  <a href="https://wa.me/918428705251" target="_blank" style="background:#25D366;color:white;padding:6px 10px;border-radius:6px;font-size:0.78rem;font-weight:700;text-decoration:none;" title="WhatsApp Coordinator">💬</a>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -245,16 +218,16 @@
           <span>⚡ Immediate Emergency Response via WhatsApp</span>
         </div>
         <p style="font-size:0.78rem;color:#1e3a8a;line-height:1.45;margin:0;">
-          An instant WhatsApp message has also been prepared for the NSS Coordinator for rapid coordination.
+          Your request is recorded in the NSS BloodLink live database and visible on the coordinator dashboard. You can also optionally notify the coordinators via WhatsApp below:
         </p>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:10px;">
         <a id="modalWhatsAppPoBtn" href="#" target="_blank" class="btn btn-primary btn-block" style="background:#25D366;border-color:#25D366;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;padding:12px;font-size:0.95rem;">
-          <span style="font-size:1.2rem;">💬</span> WhatsApp Programme Officer (Sir) (+91 94456 13698)
+          <span style="font-size:1.2rem;">💬</span> Alert Programme Officer via WhatsApp
         </a>
         <a id="modalWhatsAppCoordBtn" href="#" target="_blank" class="btn btn-outline btn-block" style="color:#059669;border-color:#25D366;background:#f0fdf4;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;padding:12px;font-size:0.95rem;">
-          <span style="font-size:1.2rem;">💬</span> WhatsApp Student Coordinator (+91 84287 05251)
+          <span style="font-size:1.2rem;">💬</span> Alert Student Coordinator via WhatsApp
         </a>
         <a id="modalWhatsAppBtn" href="#" target="_blank" style="display:none;">Legacy Link</a>
         <button type="button" class="btn btn-outline btn-block" onclick="closeModal('requestSuccessModal');">Done</button>
@@ -281,9 +254,9 @@
   <!-- Firebase Cloud Database SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js?v=14"></script>
-  <script src="js/data.js?v=14"></script>
-  <script src="js/app.js?v=14"></script>
+  <script src="js/firebase-config.js?v=15"></script>
+  <script src="js/data.js?v=15"></script>
+  <script src="js/app.js?v=15"></script>
   <script>
     // Toggle blood-specific fields
     document.querySelectorAll('input[name="reqType"]').forEach(radio => {
@@ -461,11 +434,6 @@ const PO_PHONE = (typeof NSS_PO_PHONE !== 'undefined') ? NSS_PO_PHONE : '9445613
       if (typeof openModal === 'function') {
         openModal('requestSuccessModal');
       }
-
-      // Automatically launch WhatsApp in new tab
-      try {
-        window.open(waUrl, '_blank');
-      } catch (err) {}
 
       showToast('Blood request submitted & dispatched! 🎉', 'success', 5000);
     });
