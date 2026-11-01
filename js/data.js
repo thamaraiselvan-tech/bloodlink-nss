@@ -512,24 +512,75 @@ const ActivityStore = {
   }
 };
 
-// ── Urgent Requests store (localStorage) ──────────────────────────
-const UrgentRequestStore = {
+// NSS Emergency Coordinator Phone (for direct WhatsApp / call dispatch)
+// Currently set to testing number (8428705251); can be replaced with PO number (9445613698)
+const NSS_EMERGENCY_PHONE = '8428705251';
+const NSS_PO_PHONE = '9445613698';
+
+// ── Blood & Emergency Requests Store (localStorage + Cloud Firestore) ──
+const RequestStore = {
   getAll() {
-    const stored = localStorage.getItem('bloodlink_urgent');
-    return stored ? JSON.parse(stored) : [...DB.urgentRequests];
+    const stored = (typeof localStorage !== 'undefined') ? localStorage.getItem('bloodlink_requests') : null;
+    if (stored !== null) {
+      try { return JSON.parse(stored); } catch (e) { return []; }
+    }
+    return [];
   },
   save(requests) {
-    localStorage.setItem('bloodlink_urgent', JSON.stringify(requests));
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('bloodlink_requests', JSON.stringify(requests));
+    }
   },
   add(req) {
     const requests = this.getAll();
-    req.id = Date.now();
+    if (!req.id) req.id = Date.now();
+    if (!req.status) req.status = 'pending';
+    if (!req.timestamp) req.timestamp = Date.now();
+    if (!req.createdAt) req.createdAt = new Date().toISOString();
+
     requests.unshift(req);
     this.save(requests);
+
+    if (typeof CloudSync !== 'undefined' && CloudSync.saveRequest) {
+      CloudSync.saveRequest(req);
+    }
     return req;
   },
+  updateStatus(id, newStatus) {
+    const requests = this.getAll();
+    const idx = requests.findIndex(r => String(r.id) === String(id));
+    if (idx > -1) {
+      requests[idx].status = newStatus;
+      this.save(requests);
+      if (typeof CloudSync !== 'undefined' && CloudSync.saveRequest) {
+        CloudSync.saveRequest(requests[idx]);
+      }
+      return requests[idx];
+    }
+    return null;
+  },
   delete(id) {
-    const requests = this.getAll().filter(r => r.id !== id);
+    const requests = this.getAll().filter(r => String(r.id) !== String(id));
     this.save(requests);
+    if (typeof CloudSync !== 'undefined' && CloudSync.deleteRequest) {
+      CloudSync.deleteRequest(id);
+    }
+  }
+};
+
+// ── Urgent Requests store (Unified with RequestStore for real-time alerts) ──
+const UrgentRequestStore = {
+  getAll() {
+    const all = RequestStore.getAll();
+    return all.filter(r => (!r.status || r.status === 'pending') && (r.type === 'blood' || r.bloodGroup));
+  },
+  save(requests) {
+    RequestStore.save(requests);
+  },
+  add(req) {
+    return RequestStore.add(req);
+  },
+  delete(id) {
+    RequestStore.delete(id);
   }
 };

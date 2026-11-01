@@ -229,8 +229,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase-config.js"></script>
-  <script src="js/data.js?v=5"></script>
-  <script src="js/app.js?v=5"></script>
+  <script src="js/data.js?v=6"></script>
+  <script src="js/app.js?v=6"></script>
   <script>
     // Pre-fill blood group from URL param
     const urlParams = new URLSearchParams(window.location.search);
@@ -305,7 +305,7 @@
             ${d.available
               ? `<button class="btn btn-primary btn-sm" style="flex:1" onclick="openContact(${d.id})">${(typeof Auth !== 'undefined' && Auth.isVolunteer()) ? '📞 Call' : '🔒 Contact'}</button>`
               : `<button class="btn btn-outline btn-sm" style="flex:1;opacity:0.5;" disabled>Not Available</button>`}
-            <button class="btn btn-outline btn-sm" onclick="showToast('Emergency request sent to NSS team! 🚨', 'info')">🚨 Urgent</button>
+            <button class="btn btn-outline btn-sm" onclick="window.location.href='contact.html?type=blood&blood=' + encodeURIComponent('${d.blood}')" title="Submit urgent blood request for this group">🚨 Urgent</button>
           </div>
         </div>
       `).join('');

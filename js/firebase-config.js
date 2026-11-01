@@ -84,6 +84,22 @@ const CloudSync = {
         }
       }
     }, (error) => console.warn('CloudSync activities listener warning:', error));
+
+    // Realtime listener for Blood & Contact Requests (Cloud is source of truth)
+    db.collection('requests').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
+      const requests = [];
+      snapshot.forEach(doc => requests.push(doc.data()));
+      localStorage.setItem('bloodlink_requests', JSON.stringify(requests));
+      if (typeof renderBloodRequests === 'function') {
+        renderBloodRequests();
+      }
+      if (typeof loadDashboard === 'function') {
+        loadDashboard();
+      }
+      if (typeof checkUrgencyBanner === 'function') {
+        checkUrgencyBanner();
+      }
+    }, (error) => console.warn('CloudSync requests listener warning:', error));
   },
 
   // Save or update donor in cloud
@@ -144,6 +160,26 @@ const CloudSync = {
       await db.collection('activities').doc(String(activity.id)).set(activity, { merge: true });
     } catch (err) {
       console.warn('CloudSync logActivity error:', err);
+    }
+  },
+
+  // Save or update blood request in cloud
+  async saveRequest(req) {
+    if (!isFirebaseReady || !db) return;
+    try {
+      await db.collection('requests').doc(String(req.id)).set(req, { merge: true });
+    } catch (err) {
+      console.warn('CloudSync saveRequest error:', err);
+    }
+  },
+
+  // Delete blood request in cloud
+  async deleteRequest(id) {
+    if (!isFirebaseReady || !db) return;
+    try {
+      await db.collection('requests').doc(String(id)).delete();
+    } catch (err) {
+      console.warn('CloudSync deleteRequest error:', err);
     }
   }
 };
