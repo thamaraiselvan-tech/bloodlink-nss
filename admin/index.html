@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/dashboard.css?v=7">
+  <link rel="stylesheet" href="../css/dashboard.css?v=8">
   <style>
     .quick-actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 28px; }
     .quick-action-btn {
@@ -233,16 +233,16 @@
           </div>
         </div>
         <div class="table-wrapper">
-          <table>
+          <table class="req-table">
             <thead>
               <tr>
-                <th>Date / Urgency</th>
-                <th>Requester</th>
-                <th>Blood Needed</th>
-                <th>Hospital / Location</th>
-                <th>Message Details</th>
-                <th>Status</th>
-                <th>Direct Actions</th>
+                <th style="min-width:140px;">Urgency & Date</th>
+                <th style="min-width:180px;">Requester</th>
+                <th style="min-width:110px;">Blood Needed</th>
+                <th style="min-width:160px;">Hospital / Location</th>
+                <th style="min-width:220px;">Message Details</th>
+                <th style="min-width:110px;">Status</th>
+                <th style="min-width:210px;">Actions</th>
               </tr>
             </thead>
             <tbody id="requestsTableBody"></tbody>
@@ -386,8 +386,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script src="../js/firebase-config.js"></script>
-<script src="../js/data.js?v=7"></script>
-<script src="../js/app.js?v=7"></script>
+<script src="../js/data.js?v=8"></script>
+<script src="../js/app.js?v=8"></script>
 <script>
   // Auth guard
   const user = Auth.loadSession();
@@ -601,6 +601,27 @@
     }
   }
 
+    function formatUrgencyBadge(urgencyRaw) {
+    const u = (urgencyRaw || '').toLowerCase();
+    if (u.includes('24') || u.includes('emergency')) {
+      return '<span class="req-urgency-tag emergency">⚡ Emergency (24h)</span>';
+    } else if (u.includes('2-3') || u.includes('few days')) {
+      return '<span class="req-urgency-tag moderate">⏱️ 2-3 Days</span>';
+    } else if (u.includes('week')) {
+      return '<span class="req-urgency-tag normal">🗓️ Within 1 Week</span>';
+    } else {
+      return '<span class="req-urgency-tag normal">📋 Standard</span>';
+    }
+  }
+
+  function formatDisplayPhone(phoneRaw) {
+    const digits = String(phoneRaw || '').replace(/\D/g, '');
+    if (digits.length === 10) {
+      return `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`;
+    }
+    return phoneRaw || 'N/A';
+  }
+
   function renderBloodRequests() {
     const tbody = document.getElementById('requestsTableBody');
     if (!tbody) return;
@@ -642,11 +663,11 @@
     if (filtered.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="7" style="text-align:center;padding:36px 16px;color:var(--gray-400);">
-            <div style="font-size:2rem;margin-bottom:6px;">🛡️</div>
-            <strong style="color:var(--gray-700);display:block;margin-bottom:4px;">No ${filter === 'pending' ? 'Pending' : ''} Blood Requests</strong>
+          <td colspan="7" style="text-align:center;padding:40px 16px;color:var(--gray-400);">
+            <div style="font-size:2.2rem;margin-bottom:8px;">🛡️</div>
+            <strong style="color:var(--gray-700);display:block;margin-bottom:4px;font-size:0.95rem;">No ${filter === 'pending' ? 'Pending' : ''} Blood Requests</strong>
             <span style="font-size:0.82rem;color:var(--gray-500);">
-              When visitors submit blood requests on the Contact page, they will appear here in real time.
+              When visitors submit requests on the Contact page, they will appear here in real time.
             </span>
           </td>
         </tr>
@@ -659,48 +680,47 @@
       const cleanPhone = (r.phone || '').replace(/\D/g, '');
       const waNumber = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
       const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent';
-      const isUrgent = (r.urgency || '').toLowerCase().includes('emergency') || (r.urgency || '').toLowerCase().includes('24');
+      const hospitalText = (!r.hospital || r.hospital.toLowerCase().includes('not specified'))
+        ? '<span style="color:var(--gray-400);font-size:0.82rem;">Location not specified</span>'
+        : `<span style="font-weight:600;color:var(--gray-800);font-size:0.85rem;">🏥 ${r.hospital}</span>`;
+      const msgText = r.message ? `<div class="req-msg-box" title="${r.message.replace(/"/g, '&quot;')}">“${r.message}”</div>` : '<span style="color:var(--gray-400);font-size:0.8rem;">No details</span>';
 
       return `
-        <tr style="${isPending ? 'background:rgba(254, 242, 242, 0.45);' : ''}">
+        <tr style="${isPending ? 'background:#fffbfb;' : ''}">
           <td>
-            <div style="font-weight:600;font-size:0.85rem;color:var(--gray-800);">${dateStr}</div>
-            <span class="badge ${isUrgent ? 'badge-danger' : 'badge-warning'}" style="font-size:0.7rem;margin-top:2px;">
-              ${r.urgency || 'Normal'}
-            </span>
+            ${formatUrgencyBadge(r.urgency)}
+            <div class="req-date-text">📅 ${dateStr}</div>
           </td>
           <td>
             <div style="font-weight:700;color:var(--gray-900);font-size:0.92rem;">${r.name || 'Anonymous'}</div>
-            <div style="font-size:0.8rem;color:var(--gray-500);">📱 ${r.phone || 'N/A'}</div>
-            ${r.email ? `<div style="font-size:0.75rem;color:var(--gray-400);">${r.email}</div>` : ''}
-          </td>
-          <td>
-            ${r.bloodGroup ? `<span style="font-family:var(--font-display);font-size:1.15rem;font-weight:800;color:var(--red-700);">${r.bloodGroup}</span>` : '<span style="color:var(--gray-400);">Inquiry</span>'}
-            ${r.units ? `<div style="font-size:0.75rem;color:var(--gray-600);font-weight:600;">${r.units} Unit(s)</div>` : ''}
-          </td>
-          <td>
-            <div style="font-size:0.85rem;font-weight:600;color:var(--gray-800);">${r.hospital || 'Not specified'}</div>
-            <div style="font-size:0.72rem;color:var(--gray-400);">${r.type ? r.type.toUpperCase() : 'BLOOD'}</div>
-          </td>
-          <td style="max-width:240px;">
-            <div style="font-size:0.82rem;color:var(--gray-700);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;" title="${r.message || ''}">
-              ${r.message || '—'}
+            <div style="font-size:0.82rem;color:var(--gray-600);margin-top:2px;">
+              <a href="tel:${cleanPhone}" style="color:inherit;text-decoration:none;font-weight:600;">📞 ${formatDisplayPhone(r.phone)}</a>
             </div>
+            ${r.email ? `<div style="font-size:0.75rem;color:var(--gray-400);margin-top:1px;">${r.email}</div>` : ''}
           </td>
           <td>
-            ${isPending
-              ? '<span class="badge badge-danger" style="display:inline-flex;align-items:center;gap:4px;">⏳ Pending</span>'
-              : '<span class="badge badge-success" style="display:inline-flex;align-items:center;gap:4px;">✓ Fulfilled</span>'
-            }
+            <div class="req-blood-pill">${r.bloodGroup || 'Blood'}</div>
+            <div class="req-units-pill">${r.units || '1'} Unit${r.units !== '1' ? 's' : ''}</div>
           </td>
           <td>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              ${r.phone ? `<a href="tel:${r.phone}" class="btn btn-outline btn-sm" title="Call Requester" style="padding:4px 8px;font-size:0.78rem;">📞 Call</a>` : ''}
-              ${r.phone ? `<a href="https://wa.me/${waNumber}?text=${encodeURIComponent('Hello ' + (r.name || '') + ', regarding your blood request for ' + (r.bloodGroup || 'Blood') + ' on the NSS BloodLink portal:')}" target="_blank" class="btn btn-outline btn-sm" title="WhatsApp Requester" style="padding:4px 8px;font-size:0.78rem;color:#059669;border-color:#a7f3d0;">💬 WhatsApp</a>` : ''}
-              <button class="btn ${isPending ? 'btn-primary' : 'btn-outline'} btn-sm" onclick="toggleRequestStatus(${r.id})" style="padding:4px 8px;font-size:0.78rem;" title="${isPending ? 'Mark as Fulfilled' : 'Reopen Request'}">
-                ${isPending ? '✅ Resolve' : '🔄 Reopen'}
+            ${hospitalText}
+          </td>
+          <td>
+            ${msgText}
+          </td>
+          <td>
+            <span class="req-status-pill ${isPending ? 'pending' : 'resolved'}">
+              ${isPending ? '⏳ Pending' : '✓ Resolved'}
+            </span>
+          </td>
+          <td>
+            <div class="req-actions-group">
+              ${cleanPhone ? `<a href="tel:${cleanPhone}" class="req-btn req-btn-call" title="Call Requester">📞 Call</a>` : ''}
+              ${cleanPhone ? `<a href="https://wa.me/${waNumber}?text=${encodeURIComponent('Hello ' + (r.name || '') + ', regarding your blood request for ' + (r.bloodGroup || 'Blood') + ' on the NSS BloodLink portal:')}" target="_blank" class="req-btn req-btn-wa" title="WhatsApp Requester">💬 WhatsApp</a>` : ''}
+              <button class="req-btn ${isPending ? 'req-btn-resolve' : 'req-btn-reopen'}" onclick="toggleRequestStatus(${r.id})" title="${isPending ? 'Mark as Resolved' : 'Reopen Request'}">
+                ${isPending ? '✓ Resolve' : '🔄 Reopen'}
               </button>
-              <button class="btn btn-outline btn-sm" onclick="deleteBloodRequest(${r.id})" style="padding:4px 8px;font-size:0.78rem;color:var(--red-600);" title="Delete Request">
+              <button class="req-btn req-btn-delete" onclick="deleteBloodRequest(${r.id})" title="Delete Request Record">
                 🗑️
               </button>
             </div>

@@ -45,32 +45,45 @@ function renderEventsPreview() {
 function renderTopDonors() {
   const container = document.getElementById('donorsCarousel');
   if (!container) return;
-  const donors = DonorStore.getAll()
-    .filter(d => d.donations > 0)
-    .sort((a,b) => b.donations - a.donations)
-    .slice(0, 4);
+  const allDonors = typeof DonorStore !== 'undefined' ? DonorStore.getAll() : [];
 
-  if (donors.length === 0) {
+  if (allDonors.length === 0) {
     container.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;padding:36px 20px;color:var(--gray-500);background:white;border-radius:var(--radius-xl);border:1px dashed var(--gray-200);width:100%;">
-        <div style="font-size:2rem;margin-bottom:8px;">🩸</div>
-        <p style="font-size:1.05rem;font-weight:700;color:var(--gray-800);margin-bottom:4px;">Donor Database Ready</p>
-        <p style="font-size:0.85rem;color:var(--gray-400);">Sample data removed. Real donor records will appear here as they are added.</p>
-        <a href="register.html" class="btn btn-outline btn-sm" style="margin-top:12px;display:inline-flex;">+ Register First Donor</a>
+      <div style="grid-column:1/-1;text-align:center;padding:48px 24px;color:var(--gray-500);background:white;border-radius:var(--radius-2xl);border:1px dashed var(--gray-200);width:100%;box-shadow:var(--shadow-sm);">
+        <div style="font-size:2.8rem;margin-bottom:12px;">🩸</div>
+        <h3 style="font-size:1.2rem;font-weight:800;color:var(--gray-900);margin-bottom:6px;font-family:var(--font-display);">Join Our Campus Donor Community</h3>
+        <p style="font-size:0.9rem;color:var(--gray-500);max-width:440px;margin:0 auto 18px;line-height:1.6;">
+          Be someone's lifeline today. Register as an NSS student donor to help patients in emergency need across our college and community.
+        </p>
+        <a href="register.html" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:6px;">
+          <span>➕</span> Register as a Donor
+        </a>
       </div>`;
     return;
   }
 
+  // Prioritize active donors with donations, then newly registered donors
+  const donors = [...allDonors]
+    .sort((a,b) => (b.donations || 0) - (a.donations || 0) || (b.id || 0) - (a.id || 0))
+    .slice(0, 4);
+
   const colors = ['#e11d48','#be123c','#9f1239','#881337','#c2185b','#ad1457'];
-  container.innerHTML = donors.map((d, i) => `
-    <div class="donor-card">
-      <div class="donor-avatar" style="background:${colors[i % colors.length]}">${d.name.charAt(0)}</div>
-      <div class="donor-name">${d.name}</div>
-      <div class="donor-dept">${d.dept} · ${d.year} Year</div>
-      <div class="donor-blood">${d.blood}</div>
-      <div class="donor-donations">Donated <strong>${d.donations}×</strong></div>
-    </div>
-  `).join('');
+  container.innerHTML = donors.map((d, i) => {
+    const donationCount = d.donations || 0;
+    const donationBadge = donationCount > 0
+      ? `Donated <strong>${donationCount}×</strong>`
+      : `<span style="color:#059669;font-weight:700;">✓ Ready to Donate</span>`;
+
+    return `
+      <div class="donor-card">
+        <div class="donor-avatar" style="background:${colors[i % colors.length]}">${(d.name || 'D').charAt(0).toUpperCase()}</div>
+        <div class="donor-name">${d.name}</div>
+        <div class="donor-dept">${d.dept || ''} ${d.year ? '· ' + d.year : ''}</div>
+        <div class="donor-blood">${d.blood}</div>
+        <div class="donor-donations">${donationBadge}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 // ── Urgency banner dynamic check ──────────────────────────────────

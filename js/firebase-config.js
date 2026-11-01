@@ -64,6 +64,12 @@ const CloudSync = {
       } else if (typeof runSearch === 'function' && document.getElementById('donorsResultGrid')) {
         runSearch();
       }
+      if (typeof renderTopDonors === 'function') {
+        renderTopDonors();
+      }
+      if (typeof syncHomeStats === 'function') {
+        syncHomeStats();
+      }
     }, (error) => console.warn('CloudSync donors listener warning:', error));
 
     // Realtime listener for Users (Cloud is definitive source of truth)
