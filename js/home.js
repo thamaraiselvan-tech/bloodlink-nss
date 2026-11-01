@@ -128,4 +128,17 @@ document.addEventListener('DOMContentLoaded', () => {
   renderTopDonors();
   checkUrgencyBanner();
   syncHomeStats();
+
+  // Re-check after 500ms and 1500ms so cloud-synced donors immediately display
+  setTimeout(() => {
+    renderTopDonors();
+    syncHomeStats();
+    checkUrgencyBanner();
+  }, 500);
+
+  setTimeout(() => {
+    renderTopDonors();
+    syncHomeStats();
+    checkUrgencyBanner();
+  }, 1500);
 });
