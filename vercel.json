@@ -29,6 +29,14 @@
     {
       "source": "/donor-portal",
       "destination": "/donor-portal.html"
+    },
+    {
+      "source": "/consent",
+      "destination": "/parent-consent-form.html"
+    },
+    {
+      "source": "/parent-consent",
+      "destination": "/parent-consent-form.html"
     }
   ],
   "headers": [

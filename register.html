@@ -10,8 +10,8 @@
   <title>Register as Donor — BloodLink NSS Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=17">
-  <link rel="stylesheet" href="css/auth.css?v=17">
+  <link rel="stylesheet" href="css/style.css?v=18">
+  <link rel="stylesheet" href="css/auth.css?v=18">
   <style>
     .blood-group-selector { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
     .bg-option input { display: none; }
@@ -159,6 +159,67 @@
           <label class="form-label" for="dob">Date of Birth <span class="required">*</span></label>
           <input type="date" class="form-input" id="dob" required>
         </div>
+
+        <!-- 1st Year Parent Consent Upload Section (Shown conditionally) -->
+        <div id="parentConsentSection" style="display:none;margin-top:20px;padding:22px;background:#fef2f2;border:2px solid #fecdd3;border-radius:var(--radius-lg);transition:all 0.3s ease;">
+          <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;">
+            <div style="font-size:1.8rem;line-height:1;flex-shrink:0;">📋</div>
+            <div>
+              <div style="font-weight:800;color:#991b1b;font-size:1rem;margin-bottom:4px;">Parent / Guardian Consent Letter Required</div>
+              <p style="font-size:0.84rem;color:#7f1d1d;line-height:1.45;margin:0;">
+                As per NSS safety and institutional norms, all <strong>1st-Year undergraduate students</strong> must provide a signed parent/guardian permission letter before enrolling as an active blood donor.
+              </p>
+            </div>
+          </div>
+
+          <!-- Step Guide & Template Download -->
+          <div style="background:white;border:1px solid #fecdd3;border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;">
+            <div style="font-size:0.8rem;font-weight:800;text-transform:uppercase;color:#991b1b;letter-spacing:0.05em;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+              <span>📝</span> Step 1: Download & Sign Template
+            </div>
+            <p style="font-size:0.82rem;color:var(--gray-600);line-height:1.5;margin-bottom:12px;">
+              Download the official template or fill your details online to print. Get your parent or guardian's signature, then upload the signed letter below.
+            </p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <a href="assets/parent-consent-template.pdf" download="NSS-Parent-Consent-Template.pdf" class="btn btn-outline btn-sm" style="background:#fff;border-color:#f87171;color:#b91c1c;font-weight:700;">
+                <span>📥</span> Download PDF Template
+              </a>
+              <button type="button" class="btn btn-outline btn-sm" style="background:#fff;border-color:#cbd5e1;color:#334155;font-weight:700;" onclick="openPrintableConsent()">
+                <span>🖨️</span> Fill & Print Online
+              </button>
+            </div>
+          </div>
+
+          <!-- Upload Box -->
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="consentFileInput" style="color:#991b1b;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+              <span>📤</span> Step 2: Upload Signed Consent Letter <span class="required">*</span>
+            </label>
+            <div id="consentDropZone" style="border:2px dashed #f87171;background:white;border-radius:var(--radius);padding:22px;text-align:center;cursor:pointer;transition:all 0.2s;" onclick="document.getElementById('consentFileInput').click()">
+              <input type="file" id="consentFileInput" accept=".pdf,image/jpeg,image/png,image/jpg" style="display:none;" onchange="handleConsentFileSelect(this)">
+              <div id="consentUploadPrompt">
+                <div style="font-size:2.2rem;margin-bottom:8px;">📄</div>
+                <div style="font-weight:700;font-size:0.92rem;color:#1e293b;margin-bottom:4px;">
+                  Tap to upload or drop signed consent letter here
+                </div>
+                <div style="font-size:0.78rem;color:#64748b;">
+                  Supports PDF, JPG, PNG (Max 5MB)
+                </div>
+              </div>
+              <div id="consentFileSelected" style="display:none;align-items:center;justify-content:space-between;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;">
+                <div style="display:flex;align-items:center;gap:12px;text-align:left;">
+                  <span style="font-size:1.6rem;">✅</span>
+                  <div>
+                    <div id="consentFileName" style="font-weight:700;font-size:0.88rem;color:#166534;">file.pdf</div>
+                    <div id="consentFileSize" style="font-size:0.76rem;color:#15803d;">150 KB • Signed Letter Attached</div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#fca5a5;padding:5px 12px;font-size:0.78rem;background:white;" onclick="removeConsentFile(event)">Change</button>
+              </div>
+            </div>
+            <div class="form-error" id="consentError" style="display:none;margin-top:8px;font-weight:600;"></div>
+          </div>
+        </div>
         <button type="button" class="btn btn-primary btn-block btn-lg" onclick="goToStep(2)">Continue →</button>
       </div>
 
@@ -274,11 +335,153 @@
 <!-- Firebase Cloud Database SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<script src="js/firebase-config.js?v=17"></script>
-<script src="js/data.js?v=17"></script>
-<script src="js/app.js?v=17"></script>
+<script src="js/firebase-config.js?v=18"></script>
+<script src="js/data.js?v=18"></script>
+<script src="js/app.js?v=18"></script>
 <script>
   let currentStep = 1;
+  let parentConsentData = null;
+
+  // Toggle 1st Year Parent Consent Section
+  document.getElementById('year')?.addEventListener('change', function() {
+    const sec = document.getElementById('parentConsentSection');
+    if (!sec) return;
+    if (this.value === '1st Year') {
+      sec.style.display = 'block';
+    } else {
+      sec.style.display = 'none';
+      parentConsentData = null;
+      resetConsentUploadUI();
+    }
+  });
+
+  // Open Printable Consent Form with auto-filled values
+  function openPrintableConsent() {
+    const fName = (document.getElementById('firstName')?.value || '').trim();
+    const lName = (document.getElementById('lastName')?.value || '').trim();
+    const fullName = `${fName} ${lName}`.trim();
+    const roll = (document.getElementById('rollNo')?.value || '').trim();
+    const dept = document.getElementById('department')?.value || '';
+    const phone = (document.getElementById('phone')?.value || '').trim();
+    const dob = document.getElementById('dob')?.value || '';
+
+    const params = new URLSearchParams();
+    if (fullName) params.set('name', fullName);
+    if (roll) params.set('roll', roll);
+    if (dept) params.set('dept', dept);
+    if (phone) params.set('phone', phone);
+    if (dob) params.set('dob', dob);
+
+    window.open(`parent-consent-form.html?${params.toString()}`, '_blank');
+  }
+
+  // Handle Consent File Select
+  function handleConsentFileSelect(input) {
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const consentErr = document.getElementById('consentError');
+    if (file.size > 5 * 1024 * 1024) {
+      if (consentErr) {
+        consentErr.textContent = 'File is too large. Maximum allowed size is 5MB.';
+        consentErr.style.display = 'block';
+      }
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      parentConsentData = {
+        name: file.name,
+        size: formatFileSize(file.size),
+        rawSize: file.size,
+        type: file.type || 'application/pdf',
+        data: e.target.result,
+        uploadedAt: new Date().toISOString()
+      };
+
+      document.getElementById('consentFileName').textContent = file.name;
+      document.getElementById('consentFileSize').textContent = `${formatFileSize(file.size)} • Signed Letter Attached`;
+      document.getElementById('consentUploadPrompt').style.display = 'none';
+      document.getElementById('consentFileSelected').style.display = 'flex';
+      if (consentErr) consentErr.style.display = 'none';
+
+      const dropZone = document.getElementById('consentDropZone');
+      if (dropZone) {
+        dropZone.style.borderColor = '#16a34a';
+        dropZone.style.background = '#f0fdf4';
+      }
+      showToast('Parent consent letter attached successfully! ✅', 'success');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeConsentFile(e) {
+    if (e) e.stopPropagation();
+    parentConsentData = null;
+    const input = document.getElementById('consentFileInput');
+    if (input) input.value = '';
+    resetConsentUploadUI();
+  }
+
+  function resetConsentUploadUI() {
+    const prompt = document.getElementById('consentUploadPrompt');
+    if (prompt) prompt.style.display = 'block';
+    const sel = document.getElementById('consentFileSelected');
+    if (sel) sel.style.display = 'none';
+    const dropZone = document.getElementById('consentDropZone');
+    if (dropZone) {
+      dropZone.style.borderColor = '#f87171';
+      dropZone.style.background = 'white';
+    }
+    const err = document.getElementById('consentError');
+    if (err) err.style.display = 'none';
+  }
+
+  function formatFileSize(bytes) {
+    if (!bytes) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  // Setup Drag & Drop for Consent Upload Zone
+  document.addEventListener('DOMContentLoaded', () => {
+    const dropZone = document.getElementById('consentDropZone');
+    if (dropZone) {
+      ['dragenter', 'dragover'].forEach(ev => {
+        dropZone.addEventListener(ev, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.style.borderColor = '#b91c1c';
+          dropZone.style.background = '#fff1f2';
+        });
+      });
+      ['dragleave', 'drop'].forEach(ev => {
+        dropZone.addEventListener(ev, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!parentConsentData) {
+            dropZone.style.borderColor = '#f87171';
+            dropZone.style.background = 'white';
+          }
+        });
+      });
+      dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+          const input = document.getElementById('consentFileInput');
+          if (input) {
+            input.files = files;
+            handleConsentFileSelect(input);
+          }
+        }
+      });
+    }
+  });
 
   function goToStep(step) {
     // Validate current step before moving forward
@@ -326,6 +529,33 @@
       });
       const phone = document.getElementById('phone').value;
       if (phone && !validatePhone(phone)) { showFieldError('phone','Enter a valid 10-digit phone number'); valid = false; }
+
+      // 1st Year Parent Consent Validation
+      const yearVal = document.getElementById('year')?.value || '';
+      if (yearVal === '1st Year') {
+        const consentErr = document.getElementById('consentError');
+        const dropZone = document.getElementById('consentDropZone');
+        if (!parentConsentData) {
+          if (consentErr) {
+            consentErr.textContent = 'Please download the template and upload the signed parent consent letter to proceed.';
+            consentErr.style.display = 'block';
+          }
+          if (dropZone) {
+            dropZone.style.borderColor = 'var(--red-600)';
+            dropZone.style.background = '#fff5f5';
+          }
+          showToast('1st Year registration requires signed parent consent letter.', 'error', 5000);
+          document.getElementById('parentConsentSection')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          valid = false;
+        } else {
+          if (consentErr) consentErr.style.display = 'none';
+          if (dropZone) {
+            dropZone.style.borderColor = '#16a34a';
+            dropZone.style.background = '#f0fdf4';
+          }
+        }
+      }
+
       return valid;
     }
     if (step === 2) {
@@ -420,6 +650,8 @@
         },
         medicalConditions: medConditions,
         city:        'Chennai',
+        parentConsent: (year === '1st Year' ? parentConsentData : null),
+        consentStatus: (year === '1st Year' ? 'Uploaded & Verified' : 'Not Required'),
         registeredAt: new Date().toISOString()
       };
 
@@ -473,7 +705,9 @@
             dept: savedDonor.dept,
             deptCode: savedDonor.dept,
             blood: savedDonor.blood,
-            year: savedDonor.year
+            year: savedDonor.year,
+            parentConsent: savedDonor.parentConsent || null,
+            consentStatus: savedDonor.consentStatus || 'Not Required'
           };
 
           if (typeof UserStore !== 'undefined') {
@@ -498,8 +732,8 @@
             ActivityStore.add({
               type: 'register',
               icon: '🩸',
-              title: 'New Donor Registered',
-              desc: `${savedDonor.name} (${savedDonor.blood}, ${savedDonor.dept}) registered as a blood donor.`
+              title: savedDonor.year === '1st Year' ? 'New 1st Year Donor (Parent Consent Attached)' : 'New Donor Registered',
+              desc: `${savedDonor.name} (${savedDonor.blood}, ${savedDonor.dept}${savedDonor.year === '1st Year' ? ' · 1st Year' : ''}) registered as a blood donor.`
             });
           }
 
@@ -518,6 +752,8 @@
                <strong>Roll No:</strong> ${savedDonor.rollNo}<br>
                <strong>Department:</strong> ${savedDonor.dept}<br>
                <strong>Blood Group:</strong> ${savedDonor.blood}<br>
+               <strong>Year:</strong> ${savedDonor.year || '1st Year'}<br>
+               ${savedDonor.parentConsent ? '<strong>Parent Consent:</strong> <span style="color:var(--green-600);font-weight:700;">✓ Signed Letter Attached</span><br>' : ''}
                <strong>Email:</strong> ${email}<br>
                <span style="color:var(--green-600);font-weight:600;display:inline-block;margin-top:6px;">✓ Account created! You can now log in with your email/phone and password.</span>`;
           }

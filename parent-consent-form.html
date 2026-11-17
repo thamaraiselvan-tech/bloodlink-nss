@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NSS BloodLink — Parent / Guardian Consent Form (1st Year Donors)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #991b1b;
+      --primary-light: #fef2f2;
+      --border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #f1f5f9;
+      color: var(--text-main);
+      padding: 30px 16px;
+      line-height: 1.5;
+    }
+
+    /* Floating control bar */
+    .action-bar {
+      max-width: 820px;
+      margin: 0 auto 20px auto;
+      background: white;
+      padding: 14px 20px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+    .action-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .action-btns {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover { background: #7f1d1d; }
+    .btn-outline {
+      background: white;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+    }
+    .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+
+    /* Printable Sheet */
+    .sheet {
+      max-width: 820px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px 48px;
+      border-radius: 4px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 1px solid #cbd5e1;
+    }
+
+    /* Header */
+    .header-box {
+      border: 2px solid #fecdd3;
+      background: #fff1f2;
+      border-radius: 8px;
+      padding: 16px 20px;
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .inst-badge {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #991b1b;
+      margin-bottom: 4px;
+    }
+    .doc-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #881337;
+      margin-bottom: 4px;
+    }
+    .doc-sub {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+    .doc-note {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-style: italic;
+    }
+
+    /* Section Titles */
+    .sec-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid #fee2e2;
+      padding-bottom: 4px;
+      margin: 18px 0 12px 0;
+    }
+
+    /* Form Fields Grid */
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 24px;
+      margin-bottom: 8px;
+    }
+    .field-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .field-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #334155;
+    }
+    .field-fill {
+      border-bottom: 1.5px dotted #94a3b8;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0f172a;
+      min-height: 24px;
+      padding: 2px 4px;
+      background: transparent;
+    }
+    .field-fill:empty::before {
+      content: ' ';
+    }
+
+    /* Declaration Box */
+    .decl-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 14px 16px;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: #1e293b;
+      margin: 12px 0 20px 0;
+    }
+    .decl-box ol {
+      padding-left: 20px;
+      margin-top: 6px;
+    }
+    .decl-box li {
+      margin-bottom: 6px;
+    }
+
+    /* Signatures */
+    .sig-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin: 28px 0 20px 0;
+    }
+    .sig-box {
+      border-top: 1.5px solid #0f172a;
+      padding-top: 8px;
+      font-size: 0.8rem;
+    }
+    .sig-title {
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    /* Office use box */
+    .office-box {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 0.74rem;
+      color: #475569;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .sheet {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      @page {
+        size: A4;
+        margin: 12mm 15mm;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Top Bar -->
+  <div class="action-bar no-print">
+    <div class="action-title">
+      <span>🩸</span>
+      <span>NSS BloodLink • 1st Year Parent Consent Form</span>
+    </div>
+    <div class="action-btns">
+      <button class="btn btn-outline" onclick="window.close()">✕ Close</button>
+      <a href="assets/parent-consent-template.pdf" download="parent-consent-template.pdf" class="btn btn-outline">📥 Download PDF</a>
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    </div>
+  </div>
+
+  <!-- Printable Sheet (A4) -->
+  <div class="sheet">
+    
+    <!-- Header -->
+    <div class="header-box">
+      <div class="inst-badge">National Service Scheme (NSS) • Voluntary BloodLine</div>
+      <h1 class="doc-title">Parent / Guardian Consent Declaration</h1>
+      <div class="doc-sub">Mandatory for 1st-Year Undergraduate Student Blood Donors</div>
+      <div class="doc-note">To be filled by the student, signed by the parent/guardian, and uploaded during donor registration.</div>
+    </div>
+
+    <!-- Section 1 -->
+    <div class="sec-title">Section 1: Student Details (To be filled by student)</div>
+    <div class="field-grid">
+      <div class="field-item">
+        <span class="field-label">Student Full Name:</span>
+        <div class="field-fill" id="dispName">________________________________________________</div>
+      </div>
+      <div class="field-item">
+        <span class="field-label">Batch / Roll Number:</span>
+        <div class="field-fill" id="dispRoll">____________________</div>
+      </div>
+      <div class="field-item">
+        <span class="field-label">Department / Branch:</span>
+        <div class="field-fill" id="dispDept">________________________________________________</div>
+      </div>
+      <div class="field-item">
+        <span class="field-label">Year of Study:</span>
+        <div class="field-fill"><strong>1st Year</strong></div>
+      </div>
+      <div class="field-item">
+        <span class="field-label">Date of Birth / Age:</span>
+        <div class="field-fill" id="dispDob">____ / ____ / ________ (Age: ____ yrs)</div>
+      </div>
+      <div class="field-item">
+        <span class="field-label">Blood Group:</span>
+        <div class="field-fill" id="dispBlood">____________________</div>
+      </div>
+      <div class="field-item">
+        <span class="field-label">Student Mobile Number:</span>
+        <div class="field-fill" id="dispPhone">+91 ________________________</div>
+      </div>
+      <div class="field-item">
+        <span class="field-label">Student Email ID:</span>
+        <div class="field-fill" id="dispEmail">________________________________________</div>
+      </div>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="sec-title">Section 2: Parent / Guardian Information & Consent Declaration</div>
+    <div class="field-grid">
+      <div class="field-item">
+        <span class="field-label">Parent / Guardian Full Name:</span>
+        <div class="field-fill">________________________________________________</div>
+      </div>
+      <div class="field-item">
+        <span class="field-label">Relationship with Student:</span>
+        <div class="field-fill">[ &nbsp; ] Father &nbsp;&nbsp;&nbsp; [ &nbsp; ] Mother &nbsp;&nbsp;&nbsp; [ &nbsp; ] Guardian</div>
+      </div>
+      <div class="field-item">
+        <span class="field-label">Parent Contact Mobile Number:</span>
+        <div class="field-fill">+91 ________________________</div>
+      </div>
+      <div class="field-item">
+        <span class="field-label">Alternate Emergency Contact:</span>
+        <div class="field-fill">+91 ________________________</div>
+      </div>
+      <div class="field-item" style="grid-column: 1 / -1;">
+        <span class="field-label">Residential Address:</span>
+        <div class="field-fill">____________________________________________________________________________________________________</div>
+      </div>
+    </div>
+
+    <!-- Declaration Statement -->
+    <div class="decl-box">
+      <strong>Declaration & Consent:</strong>
+      <ol>
+        <li>I confirm that I am the parent / legal guardian of the student mentioned above.</li>
+        <li>I have been informed that my ward desires to enroll as a voluntary blood donor in the campus <strong>NSS BloodLink Voluntary Donor Network</strong>.</li>
+        <li>I hereby grant my <strong>full and informed consent</strong> for my ward to donate blood at voluntary campus blood donation drives and hospital emergency calls facilitated by the NSS Unit.</li>
+        <li>I understand that all blood donations are conducted under certified medical supervision using sterile, single-use disposable equipment adhering to strict National Blood Transfusion Council (NBTC) safety guidelines.</li>
+        <li>To the best of my knowledge, my ward is in good health and has no known medical condition restricting safe donation.</li>
+      </ol>
+    </div>
+
+    <!-- Section 3: Signatures -->
+    <div class="sec-title">Section 3: Verification & Signatures</div>
+    <div class="sig-grid">
+      <div class="sig-box">
+        <div class="sig-title">Signature of Parent / Guardian</div>
+        <div>Full Name: _________________________________</div>
+        <div style="margin-top:4px;">Date: ______ / ______ / 2026 &nbsp;&nbsp; Place: ______________</div>
+      </div>
+      <div class="sig-box">
+        <div class="sig-title">Signature of Student</div>
+        <div>Full Name: _________________________________</div>
+        <div style="margin-top:4px;">Date: ______ / ______ / 2026 &nbsp;&nbsp; Place: ______________</div>
+      </div>
+    </div>
+
+    <!-- Section 4: Office use -->
+    <div class="office-box">
+      <div>
+        <strong>FOR NSS UNIT OFFICE USE ONLY</strong><br/>
+        Verified by (Student Coordinator): ______________________<br/>
+        Signature & Date: _____________________________________
+      </div>
+      <div>
+        Approved by Programme Officer (PO): ____________________<br/>
+        Official Seal / Remarks: _______________________________
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Pre-fill fields from URL query params if provided
+    (function() {
+      const p = new URLSearchParams(window.location.search);
+      const name = p.get('name');
+      const roll = p.get('roll');
+      const dept = p.get('dept');
+      const phone = p.get('phone');
+      const email = p.get('email');
+      const dob = p.get('dob');
+      const blood = p.get('blood');
+
+      if (name)  document.getElementById('dispName').textContent  = name;
+      if (roll)  document.getElementById('dispRoll').textContent  = roll;
+      if (dept)  document.getElementById('dispDept').textContent  = dept;
+      if (phone) document.getElementById('dispPhone').textContent = phone.startsWith('+91') ? phone : '+91 ' + phone;
+      if (email) document.getElementById('dispEmail').textContent = email;
+      if (dob)   document.getElementById('dispDob').textContent   = dob;
+      if (blood) document.getElementById('dispBlood').textContent = blood;
+    })();
+  </script>
+</body>
+</html>
