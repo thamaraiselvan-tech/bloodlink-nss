@@ -32,11 +32,11 @@
     },
     {
       "source": "/consent",
-      "destination": "/parent-consent-form.html"
+      "destination": "/parent-consent-form"
     },
     {
       "source": "/parent-consent",
-      "destination": "/parent-consent-form.html"
+      "destination": "/parent-consent-form"
     }
   ],
   "headers": [
